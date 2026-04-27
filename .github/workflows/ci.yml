@@ -27,3 +27,9 @@ jobs:
 
       - name: Compile packages
         run: python -m compileall decision_agent web_app
+
+      - name: Run decision-agent smoke case
+        run: python -m decision_agent.run_case decision_agent/input/case_001_normalized.json
+
+      - name: Check smoke output
+        run: test -f output/decision_agent/case_001_normalized.decision_summary.json

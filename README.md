@@ -1,5 +1,8 @@
 # AI Engineering Decision Agent
 
+[![CI](https://github.com/KobekingLu/AI-Engineering-Decision-Agent/actions/workflows/ci.yml/badge.svg)](https://github.com/KobekingLu/AI-Engineering-Decision-Agent/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
+
 AI Engineering Decision Agent is a demo-grade system for cross-function engineering decision assistance under incomplete information.
 
 It helps AE, PM, RD, and DQA move from scattered evidence to a decision-ready view faster, while keeping uncertainty visible and avoiding overclaiming on incomplete cases.
@@ -50,6 +53,18 @@ Run the sample case flow:
 python -m decision_agent.run_case decision_agent/input/case_002_ae_issue.json
 ```
 
+Run the default sample set:
+
+```powershell
+python -m decision_agent.run_case
+```
+
+Run a second sample case:
+
+```powershell
+python -m decision_agent.run_case decision_agent/input/case_003_dqa_issue.json
+```
+
 Run benchmark regression:
 
 ```powershell
@@ -61,6 +76,12 @@ Run the local Streamlit app:
 ```powershell
 python web_app/run_app.py
 ```
+
+Example outputs are written to:
+
+- `output/decision_agent/`
+- `output/web_app/json/`
+- `output/web_app/html/`
 
 ## Validation
 
