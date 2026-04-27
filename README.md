@@ -92,6 +92,10 @@ This repo includes a GitHub Actions workflow that performs a basic maintenance c
 
 That gives us a quick syntax and import-path sanity check on every push and pull request.
 
+## Releases
+
+- [v0.1.0 release notes](docs/releases/v0.1.0.md)
+
 ## Decision Assistance Shape
 
 The agent is designed to output:
