@@ -4,6 +4,16 @@ __pycache__/
 *.pyo
 *.pyd
 *.so
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+*.egg-info/
+dist/
+build/
+.ipynb_checkpoints/
 
 # Virtual environments
 .venv/
@@ -16,6 +26,7 @@ env/
 
 # Project outputs
 output/
+*.sqlite3
 
 # OS / editor noise
 .DS_Store
