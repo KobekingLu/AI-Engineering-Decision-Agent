@@ -1,0 +1,69 @@
+{
+  "decision_stage": "triage | investigation | root-cause identified | verification | closure",
+  "issue_family": "PCIe | power-reset | memory | storage | firmware | other",
+  "issue_subtype": "family-specific subtype",
+  "action_mode": "triage | investigate | verify | close",
+  "resolution_state": "open | investigating | root_cause_identified | ready_for_verification | fixed | closed",
+  "lifecycle_status": "normalized lifecycle status",
+  "lifecycle_status_history": [
+    "status1",
+    "status2"
+  ],
+  "status_history_events": [
+    {
+      "from": "status1",
+      "to": "status2",
+      "source_field": "combined_text",
+      "matched_text": "status changed from ..."
+    }
+  ],
+  "lifecycle_signals": [
+    "signal1",
+    "signal2"
+  ],
+  "lifecycle_signal_items": [
+    {
+      "signal_type": "PASS signal",
+      "source_field": "combined_text",
+      "matched_text": "retest pass"
+    }
+  ],
+  "lifecycle_evidence_summary": "short text",
+  "lifecycle_evidence_summary_zh": "short text",
+  "confidence": "high | medium | low",
+  "decisive_evidence": [
+    "evidence 1",
+    "evidence 2"
+  ],
+  "unresolved_gap": [
+    "gap 1",
+    "gap 2"
+  ],
+  "uncertainty_summary": "short text",
+  "next_step_focus": "short text",
+  "knowledge_governance_note": "short text",
+  "issue_type": "backward-compatible issue family",
+  "matched_historical_cases": [
+    "bug_id_1",
+    "bug_id_2"
+  ],
+  "root_cause_hypothesis": "short text",
+  "root_cause_hypothesis_zh": "short text",
+  "risk_level": "Critical | Major | Minor | Low | Unknown",
+  "recommended_action": "short action",
+  "recommended_action_zh": "short action",
+  "decision_summary": "short summary",
+  "decision_summary_zh": "short summary",
+  "missing_information": [
+    "item1",
+    "item2"
+  ],
+  "reasoning_trace": [
+    "short bullet 1",
+    "short bullet 2"
+  ],
+  "reasoning_trace_zh": [
+    "中文條列 1",
+    "中文條列 2"
+  ]
+}

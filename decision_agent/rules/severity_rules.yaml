@@ -1,0 +1,20 @@
+severity_levels:
+  Critical:
+  - power cycle or reboot abnormal result with fail rate > 50%
+  - uncorrectable MCE
+  - reproducible system hang or crash during test
+  - I/O port cannot read/write
+  - device not detected
+  - no display output
+  Major:
+  - power cycle abnormal result with fail rate 3%~50%
+  - RMT test abnormal
+  - I/O function or performance does not meet DQA criteria or project spec
+  Minor:
+  - function is normal but additional error messages appear during test
+  - correctable MCE
+  - information is incorrect
+  - power cycle abnormal result with fail rate <= 3%
+  Low:
+  - functional abnormality on accessory/peripheral not included in shipping configuration
+general_rule: If multiple issues exist, use the highest severity level.

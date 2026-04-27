@@ -1,0 +1,430 @@
+﻿bug_id,project,component,status,subject,description,rd_command,author,feature_id,feature_id_detail,created_time,source_sheet,quarter
+141307,FWA-3080,HW,Clarifying,"[HW-F040.0B]During memory margin testing on the FWA-3080 with AQD-D5V32GE56-SB 32GB, the WRITE_1D_JTAG item measured a minimum Vref offset of -38.50 mV, which fails the ±40 mV specification.","於 FWA-3080 A101-1 平台進行 AMD RMT 測試時，針對多組 CPU + Memory 組態進行 margin 驗證，結果顯示部分組態於 WRITE_1D_JTAG 測項落於 ±40 mV 規格邊界，需透過調整 memory training 相關設定後方可 PASS；
+惟其中一組 CPU + Memory 組態可在 維持預設 BIOS training 條件（未進行 TX2D_DFE / Enhanced Memory Training 調整）下即 PASS，顯示該組態本身具備較充足的 write margin。
+整體結果顯示 FWA-3080 於不同 CPU + Memory 組合下之 write margin 存在差異，相關行為仍待 RD 進一步評估平台設計或 training 策略。",,,,,,2025Q4_HW_BUG討論,2025Q4
+141275,FWA-3080,HW,Fixed,[HW-F083.0A]The onboard I350 behavior in DISCONNECT mode during AC POWER_OFF does not comply with the expected specification.,"於 AC POWER_OFF 事件下，onboard I350 設定為 DISCONNECT 模式 時，仍出現 bypass 行為。
+RD 分析為 AC power-off 過程中，控制端（MCU）掉電速度快於被控制端（Relay），導致 bypass 控制訊號於掉電期間出現非預期拉高，誤觸發 Relay 切換至 BYPASS 狀態；經調整 bypass 控制電路，使被控制端掉電行為與控制訊號一致後，行為已符合規格。",,,,,,2025Q4_HW_BUG討論,2025Q4
+139510,SKY-712V4,HW,Clarifying,"[HW-R0R2.0A.0Z.05][U2 SKU][E3.S SKU] System fails to complete boot cycle; Stuck during POST behavior, but PSU reports S5 state.",於 OS reboot 測試過程中，系統無法完成 reboot，畫面卡在 BIOS POST 階段，同時由 BMC / Power Supply 狀態觀察到 PSU 進入 S5（Off）狀態，與預期 reboot 行為不符；該問題於 U.2 / E3.S SKU 測試情境下可重現（Fail rate 2/2），目前仍在釐清原因中。,,,,,,2025Q4_HW_BUG討論,2025Q4
+138592,SKY-621V4,HW,Clarifying,[HW-F081.0A.03] There are CRC error on X710-AT during AC/DC power cycle test.,"於 AC/DC power cycle 測試後，X710-AT 10G Copper 偶發出現 CRC error（Fail rate 5/200）。
+此行為與過往多季平台出現之 X710 Copper CRC 問題型態相同，屬於 power cycle 後 link 狀態未完全重置所致，需透過 link re-initialization 類 workaround 進行處理；目前已嘗試相關 workaround，後續將與 RD 確認合適的套用層級與時機。",,,,,,2025Q4_HW_BUG討論,2025Q4
+134320,VEGA-DLU120,HW,Wait for next HW revision,[HW-R0R2.0A.01] System hang during repeated reboot test at iteration 24 with red LED (D15),"因為Bootloader有機率卡住，導致Reboot失敗，先加入Watchdog硬體線路來重開
+覆驗PASS，等新版HW再重新驗證",Bring-up 已知問題，因技轉未完整導致 DQA 重複投入；後續Solution由 SW/FPGA 優化即可解決，無需新增 HW Watchdog 線路。後續機種預防措施：進 DQA測試前由 RD 提供 Known-Issues/Workarounds/Test Limits 等資訊。,stephen.lee,HW-R0R2.0A.01,"執行Reboot後, DUT會Reboot ",2025-05-29,2025Q3_HW_BUG討論,2025Q3
+133696,VEGA-6000,HW,Fixed,"[HW-R0R3.0A.0Z.06] AC power loss on the DUT causes the console connection to drop, so the next boot messages can't be seen in the terminal.","因為 RESET 線上有顆 C686 電容，導致 AC 斷電後重新上電時，RESET 訊號延遲釋放，讓 UART console 沒辦法及時連回來。
+
+FAE 建議把 C686 拿掉，避免 RESET 延遲干擾。",比照參考公板修正 CP2105_RSTn RC（移除 C686 0.1 µF），避免因 RESET 延遲造成 UART 掉線；後續機種將參考設計差異審查納入設計檢核項。,stephen.lee,HW-R0R3.0A.0Z.06,"Other error message related to G2(S5) Power On/Off (not PCIe AER, MCE, PCIe lane error)",2025-04-17,2025Q3_HW_BUG討論,2025Q3
+137070,SKY-712V4,HW,Fixing,[HW-F081.0A] The VPD for the onboard X710 10GBASE-T adapter. It currently reads as a SKY-8136S and must be changed to SKY-712V4. ,將在DVT板子回來驗證時一併修改,為了 Bring-up 功能驗證暫用他案 FW；若屬成熟 IC（如 I350/X710），EVT 階段即向 Intel 要求於 LAN FW 中將 VPD 更新為正確機種資訊。在進入 DQA 前，於技轉文件明列「VPD 未修正」為已知議題（附 Task ID），DQA 僅記錄不開案以避免重工。,apple.chi,HW-F081.0A,Ethernet VPD/transceiver Information is readable and correct.,2025-09-18,2025Q3_HW_BUG討論,2025Q3
+136913,SKY-712V4,HW,Clarifying,[HW-R0R3.0B.0Z.06]  E3.S NVMe SSD SKU (Bus:Dev.Fun 80:00.4) reported corrected error: BIT14 failed during AC power cycle testing,"問題還在確認中
+SKY-712V4（#136913）跟 SKY-622G4（#135174）這兩個 issue 現象很像，都是 Corrected PCIe AER Bit14。
+不過 622G4 那邊 EERD 有註明「Use BIOS 0.08 can’t duplicate (check BIOS changelist)」。",仍在Debug；待新版本 Riser Card 到位後，執行復驗。,apple.chi,HW-R0R3.0B.0Z.06,"Other error message related to G3 Power On/Off (not PCIe AER, MCE, PCIe lane error)",2025-09-12,2025Q3_HW_BUG討論,2025Q3
+136912,SKY-712V4,HW,Clarifying,[HW-R0R3.0B.0Z.06] A Voltage C0_AUX_3_3-VOL lower critical alert was triggered during AC Power Cycle Testing,於 AC Power Cycle 測試期間，BMC 偶發誤判 C0_AUX_3_3-VOL 低電壓（瞬間讀值為 0V，隨後恢復正常），系統實際運作正常，屬於 AC 斷電/上電瞬間之量測偏移（sensing glitch），非實際 power rail 掉電。,"RD 判定為 BMC 量測路徑串聯電阻造成 AC power transition 時的電壓偏移，已移除該串阻（如 R225）以避免誤判；
+後續機種設計建議 避免於 BMC AUX power sensing 路徑加入串聯電阻，並於 DVT 階段加強 AC power cycle 驗證 BMC 電壓量測行為。",apple.chi,HW-R0R3.0B.0Z.06,"Other error message related to G3 Power On/Off (not PCIe AER, MCE, PCIe lane error)",2025-09-12,2025Q3_HW_BUG討論,2025Q3
+136891,SKY-712V4,HW,Clarifying,"[HW-R0R4.0Z.05] The PCIe device is expected to run at x16 lanes, but it is only operating at x8 lanes.( for SKY-722V4 RIS1B A101-1 )",RIS1B A101-1 上 PCIe link 預期 x16 但會降為 x8；同卡換到 RIS1A 則無此現象，判斷與 RIS1B 板端訊號完整性/走線設計相關。,RD 以 RIS1B 進行走線/版圖優化（SI 改善），並評估 stack-up/板材（Dk/Df、loss）對高速訊號之影響；RIS1B A101-2 以相同卡驗證已 PASS，問題不再復現。,apple.chi,HW-R0R4.0Z.05,"Other error message related to System stress (not PCIe AER, MCE, PCIe lane error)",2025-09-11,2025Q3_HW_BUG討論,2025Q3
+135323,SKY-622G4,BMC,Wait for next SW revision,[HW-F0E1.0A.02][Front Panel] Power Button Long Press (4s) Fails to Trigger Forced Shutdown,"Update BMC boot loader from 0.36 to 0.37 fixed this issue
+(V0.37  Change list u-boot-2019.04-1.10.0
+- [new] Aspeed controller SGPIO support
+- [remove] build dependency for SSL library and build warnings)
+*非HW Design 提醒送測前，再幫忙確認所有FW版本。",送測前，確認所有FW版本,Bill.lu,HW-F0E1.0A.02,"Press Power Button at specific press time, DUT shutdown immediately",2025-07-21,2025Q3_HW_BUG討論,2025Q3
+135322,SKY-622G4,HW,Support & HW Rework,[HW-F0E1.0B][Front Panel]Reset Button Malfunction – No Response After Pressing,"This issue cause by reset Button signal( RST BT N_FP#) low voltage still have 1.7V level (shoud under 0.1V) with FB board
+change R2018 to 0 ohm to fix this issue
+(屬於 硬體設計問題：RST_BT_N_FP# 於 Low 狀態時因分壓電阻設計，實際電位仍約 1.7V（未達有效 Low），導致 Reset 訊號無法正確觸發，問題僅於搭配 FB board 時發生。)","RD 調整 Reset 訊號分壓設計（將 R2018 改為 0Ω），以消除不必要的分壓路徑並強化 Low level 拉低能力；
+並於 Redmine 分享設計思維與分壓計算邏輯，作為後續機種 Reset 訊號設計與審查參考。",Bill.lu,HW-F0E1.0B,Reset Button works normally,2025-07-21,2025Q3_HW_BUG討論,2025Q3
+134882,SKY-8136S,BIOS,Clarifying,[dBIOS2-A10.4] [BIOS Setup menu specification] The DSA option doesn't in the setup menu.,sandy.hung,2025-06-23,,,,,2025Q2_HW_BUG討論,2025Q2
+134880,SKY-8134S-11,BMC,New,"[BMC_I08-2.26][DIMM_TMP Sensor]Didn't have DIMM at DIMM slot, some DIMM temperature sensor display ""No Reading"", some DIMM temperature sensor display ""Disable""",David.Huang,2025-06-23,,,,,2025Q2_HW_BUG討論,2025Q2
+134879,SKY-8136S,BIOS,Clarifying,[dBIOS2-A09.1][BIOS Version Token sync mechanism] POST Phase version string missing 'E' prefix and date.,sandy.hung,2025-06-23,,,,,2025Q2_HW_BUG討論,2025Q2
+134865,SKY-8136S,Unknown,Clarifying,"[dBIOS4-C1.2][Power on w/ No Error] During system boot into the OS, an EFI error message appears.",sandy.hung,2025-06-20,,,,,2025Q2_HW_BUG討論,2025Q2
+134817,FWA-5070,Unknown,New,"[Versa] [dBIOS4-C4.2] [Warm reset  w/ No Error]  Warm reset triggers SEL ""Voltage PSU1_IN-VOL | Lower Critical going low | Asserted"" (1/2)",Sherrie.Wu,2025-06-20,,,,,2025Q2_HW_BUG討論,2025Q2
+134816,FWA-5070,Unknown,New,"[Versa] [dBIOS4-C3.2] [Cold reset  w/ No Error] Cold reset triggers SEL ""FW_PROGRESS | Unrecoverable video controller failure"" (1/2)",Sherrie.Wu,2025-06-20,,,,,2025Q2_HW_BUG討論,2025Q2
+134815,FWA-5070,Unknown,New,[Versa] [dBIOS4-C3.2] [Cold reset  w/ No Error]  System hangs during OS boot phase at 29th round of 100-cycle Cold Reset Test,Sherrie.Wu,2025-06-20,,,,,2025Q2_HW_BUG討論,2025Q2
+134569,FWA-6173,Unknown,Won't-fix,[dBIOS2-H08] [BIOS support CPU C State Control] Core C-State does not show C6 in HWInfo when system is idle,Sherrie.Wu,2025-06-16,,,,,2025Q2_HW_BUG討論,2025Q2
+134566,FWA-6173,Unknown,Won't-fix,[dBIOS2-A12]  [Support OS installation] Installation fails when installing Windows Server 2025 / Windows 11 / Windows 10 on FWA-6173,Sherrie.Wu,2025-06-16,,,,,2025Q2_HW_BUG討論,2025Q2
+134539,FWA-6173,Chipset/Chip Vendor,Wait for next SW revision,"[dBIOS1-H00] [BIOS support Basic CPU Function Control] When [DCU Streamer Prefetcher] is set to [Enabled], the MSR register remains 1 [Disabled].",Sherrie.Wu,2025-06-13,,,,,2025Q2_HW_BUG討論,2025Q2
+134508,FWA-6173,BIOS,Wait for next SW revision,"[BIOS-A09.4][Support Type 9 - System Slots] DMI type 9 ""Designation"" displays as ""Slot x"" instead of expected ""NMC x""",Sherrie.Wu,2025-06-12,,,,,2025Q2_HW_BUG討論,2025Q2
+134458,SKY-712V4,HW,Support & HW Rework,[HW-F0I0] The LCM module is not working normally.,MB need add U59 of RS232 IC of A101-1 rework also BIOS need to support.,因 EVT 共用 722V4 BOM(無 LCM)導致，後續考慮以貼紙區分並確認進測機種避免再發生。,,,,,2025Q2_HW_BUG討論,2025Q2
+134443,FWA-6173,Unknown,Clarifying,"[BIOS-F03.2][Memory error, correctable ECC and uncorrectable ECC errors.] DUT failed to log uncorrectable ECC event ""Memory #0x08 | Uncorrectable ECC | Asserted "" in SEL on FWA-6173 .",Sherrie.Wu,2025-06-09,,,,,2025Q2_HW_BUG討論,2025Q2
+134441,FWA-6173,Unknown,Clarifying,"[BIOS-F03.2][Memory error, correctable ECC and uncorrectable ECC errors.] After injecting the 5th correctable ECC error, the DUT did not display the SEL log: ""Correctable ECC logging limit reached"" on FWA-6173.",Sherrie.Wu,2025-06-09,,,,,2025Q2_HW_BUG討論,2025Q2
+134438,SKY-8234D3 - Cohesity Regal,BMC,Clarifying,[BMC_I08-2.19][POWER_GOOD Sensor]BMC always send Power Supply POWER_GOOD Failure SEL when DUT AC power on/off,Vincent.Lin,2025-06-09,,,,,2025Q2_HW_BUG討論,2025Q2
+134425,SKY-8234D3 - Cohesity Regal,BMC,Clarifying,"[BMC_I08-2.6][FW_PROGRESS]DUT reboot or chassis power cycle, BMC generates SEL ""| System Firmwares FW_PROGRESS | System boot initiated | Asserted""",Vincent.Lin,2025-06-06,,,,,2025Q2_HW_BUG討論,2025Q2
+134412,FWA-6173,BIOS,Wait for next SW revision,"[dBIOS2-A09.1][BIOS Version Token sync mechanism] In the BIOS Setup menu, the ""Project Version"" field shows FWA-6173S, but it shall be FWA-6173",Sherrie.Wu,2025-06-05,,,,,2025Q2_HW_BUG討論,2025Q2
+134410,VEGA-DLU120,FPGA,New,[HW-F0D4.0B]DUT can't send the some correct HDMI output frame rate.,stephen.lee,2025-06-05,,,,,2025Q2_HW_BUG討論,2025Q2
+134409,SKY-8234D3 - Cohesity Regal,BIOS,Wait for next SW revision,[dBIOS2-A09.4][Devices depend on HW Design are presented on DMI type 0-127 in platform] Extra type 9 is existed before type 127.,sandy.hung,2025-06-05,,,,,2025Q2_HW_BUG討論,2025Q2
+134398,FWA-6173,3rd Party,Clarifying,[BIOS-I01.2][SR-IOV (VT-C)] X710 on NMC-1001 fails to enable 32 VFs; limited to 31 due to controller resource constraint,Sherrie.Wu,2025-06-05,,,,,2025Q2_HW_BUG討論,2025Q2
+134392,SKY-8234D3 - Cohesity Regal,Unknown,Clarifying,"[BIOS-F03.2][Memory error, correctable ECC and uncorrectable ECC errors] When using XDP to trigger Memory UCE/CE error, it doesn't have an error log in the sel log list.",sandy.hung,2025-06-04,,,,,2025Q2_HW_BUG討論,2025Q2
+134391,SKY-8234D3 - Cohesity Regal,BMC,Wait for next SW revision,[BMC_I08-2.17][PCIE_PRSNT Sensor] Root port incorrectly bifurcated to x8/x8 with only one x16 PCIe card installed on Riser3,sandy.hung,2025-06-04,,,,,2025Q2_HW_BUG討論,2025Q2
+134388,SKY-8234D3 - Cohesity Regal,BMC,Wait for next SW revision,"[BMC_I08-2.26][DIMM_TMP Sensor]Didn't have DIMM at DIMM slot, some DIMM temperature sensor display ""No Reading"", some DIMM temperature sensor display ""Disable""",Vincent.Lin,2025-06-04,,,,,2025Q2_HW_BUG討論,2025Q2
+134386,SKY-8234D3 - Cohesity Regal,BIOS,Wait for next SW revision,[BMC_RF01-14][BIOS Setting] WEB BIOS Setup modify can't save via WebUI,Vincent.Lin,2025-06-04,,,,,2025Q2_HW_BUG討論,2025Q2
+134359,SKY-8234D3 - Cohesity Regal,BMC,Wait for next SW revision,"[BMC_NE04-3.2][Virtual Media]Redfish Post insert virtual media via HTTP/S Link, but iKVM remote storage didn't synchronize",Vincent.Lin,2025-06-02,,,,,2025Q2_HW_BUG討論,2025Q2
+134333,SKY-8234D3 - Cohesity Regal,BIOS,Clarifying,[BIOS-D01][The BIOS support BBS(BIOS Boot Specification)] Boot Option cannot be set to Hard Disk as 1st boot device – jumps back to NVMe.,sandy.hung,2025-05-29,,,,,2025Q2_HW_BUG討論,2025Q2
+134332,VEGA-DLU120,FW,New,[HW-F0D3.0C] The decoded site decode wrong frame rate when DUT HDMI receive the some HDMI video signal.,stephen.lee,2025-05-29,,,,,2025Q2_HW_BUG討論,2025Q2
+134330,VEGA-DLU120,FPGA,New,[HW-F0D3.0C] DUT sometimes can't stream out for YCbCr 420 8bits HDMI video format.,stephen.lee,2025-05-29,,,,,2025Q2_HW_BUG討論,2025Q2
+134329,VEGA-DLU120,FW,New,"[HW-F0D3.0C] When HDMI video input resolution, DUT sometimes can't stream out.",stephen.lee,2025-05-29,,,,,2025Q2_HW_BUG討論,2025Q2
+134327,VEGA-DLU120,SW Tool,New,[HW-F0D3.0C]DUT SDI2 port can't receive the SDI video input source.,stephen.lee,2025-05-29,,,,,2025Q2_HW_BUG討論,2025Q2
+134324,VEGA-DLU120,FPGA,New,[HW-F0D3.0C] DUT fails to detect HD 1280x720 30P signal on SDI1 port.,stephen.lee,2025-05-29,,,,,2025Q2_HW_BUG討論,2025Q2
+134322,VEGA-DLU120,SW Tool,New,[HW-F0D3.0C] Decoded video becomes disordered after 4K frame rate change on SDI1 input,stephen.lee,2025-05-29,,,,,2025Q2_HW_BUG討論,2025Q2
+134320,VEGA-DLU120,HW,Wait for next HW revision,[HW-R0R2.0A.01] System hang during repeated reboot test at iteration 24 with red LED (D15),,,,,,,2025Q2_HW_BUG討論,2025Q2
+134303,SKY-712V4,BMC,Wait for next SW revision,[HW-R0R4.0Z.05] The DISK temperature could not be read during reliability Test. (Same as SKY-722V4 issue),apple.chi,2025-05-28,,,,,2025Q2_HW_BUG討論,2025Q2
+134302,SKY-712V4,Unknown,Wait for next HW revision,"[HW-R0R3.0A.0Z.05] During DC power cycle testing, LAN status reading indicates the link is down.",apple.chi,2025-05-28,,,,,2025Q2_HW_BUG討論,2025Q2
+134293,SKY-712V4,BMC,Wait for next SW revision,[HW-R0R3.0A.0Z.06] Concurrent reading from two RIS6A_NIC1-TMP sensors during DC power cycle test ,apple.chi,2025-05-27,,,,,2025Q2_HW_BUG討論,2025Q2
+134239,SKY-712V4,(none),Rejected,[重複BUG reject][HW-R0R3.0A.0Z.05] C0_VCCFA_VR-CUR overcurrent event during DC Power Cycle Test,apple.chi,2025-05-22,,,,,2025Q2_HW_BUG討論,2025Q2
+134237,SKY-8234D3 - Cohesity Regal,BMC,Clarifying,"[BMC_O01-22][BIOS Rollback Options (0x85)]Response value is 00 when using BIOS rollback command to check, but default setting is 1",Vincent.Lin,2025-05-22,,,,,2025Q2_HW_BUG討論,2025Q2
+134227,SKY-712V4,BMC,Fixed,[HW-R0R3.0A.0Z.05] C0_VCCFA_VR-CUR overcurrent event during DC Power Cycle Test,apple.chi,2025-05-22,,,,,2025Q2_HW_BUG討論,2025Q2
+134192,SKY-8234D3 - Cohesity Regal,Other,New,[BMC_NE01-1][Baseboard Population / Inventory]DIMM information in inventory and sensor name shall be the same as the mainboard print.,Vincent.Lin,2025-05-20,,,,,2025Q2_HW_BUG討論,2025Q2
+134082,SKY-712V4,Operating System,Fixed,[HW-F05C.0D] Unexpected behavior during NVMe hot-swap test,apple.chi,2025-05-15,,,,,2025Q2_HW_BUG討論,2025Q2
+134079,SKY-712V4,BMC,Wait for next SW revision,[HW-R0R3.0B.0Z.06] Concurrent reading from two RIS0A_NIC1-TMP sensors during AC power cycle test ,apple.chi,2025-05-15,,,,,2025Q2_HW_BUG討論,2025Q2
+134078,SKY-712V4,3rd Party,Won't-fix,[HW-R0R3.0B.0Z.01] UnCorrectable Error: for ACS Violation AER during power cycle test,apple.chi,2025-05-15,,,,,2025Q2_HW_BUG討論,2025Q2
+134077,SKY-712V4,(none),Rejected,[HW-R0R3.0B.0Z.06] PSU1 / PSU2 triggered SEL events during AC power cycle test,apple.chi,2025-05-15,,,,,2025Q2_HW_BUG討論,2025Q2
+134076,SKY-712V4,HW,Wait for next HW revision,[HW-F081.0Z.05] There are CRC error on X710-AT during AC power cycle test/Reboot/DC power cycle test,經過一些驗證及參考Bug #112385後，原討論結果為依照SKY-721E3請PM設為won't fix。但考量改版(非因此issue需改版)後可能會有些微走線變動，以及可想辦法進一步優化走線，所以待改版後複測結果。,設計已依 SKY-721E3 經驗進行，但仍有 CRC error；目前已修正 layout，將於後續改版中重新驗證。,,,,,2025Q2_HW_BUG討論,2025Q2
+134049,IPMItool,BMC,Wait for next SW revision,[BMC_I05-5][Channel Cipher Suites]RMCP+ can't use cipher suite C17  to get remote BMC informatoin when purely install Ubuntu linux and Manual Installation ipmitool ,,,,,,,2025Q2_HW_BUG討論,2025Q2
+133986,FWA-AIS6173,BMC,Rejected,[BMC_RF01][Redfish]FWA-AIS6173 Redfish is working,,,,,,,2025Q2_HW_BUG討論,2025Q2
+133980,FWA-6173,BMC,Rejected,[BMC_I08-2.10][DIMM_PRSNT Sensor]DIMM PRSNT didn't  Detection in S5 After RTC Reset,,,,,,,2025Q2_HW_BUG討論,2025Q2
+133978,FWA-6173,BMC,Fixed,"[BMC_I08-2.8][PROC_STATE Sensor]Heat CPU to trigger CPU throttled, but PROC_STATE didn't generate SEL (throttled and Thermal trip)for CPU overheat.",,,,,,,2025Q2_HW_BUG討論,2025Q2
+133969,FWA-AIS6173,BMC,Rejected,[BMC_I11-2][Write FRU Data]FWA-AIS6173 Fru file ID 9 and ID10 write but can't apply it.,,,,,,,2025Q2_HW_BUG討論,2025Q2
+133963,FWA-6173,BMC,Wait for next SW revision,[BMC_O03-6.3][Account Control]BMC reboot when Administrator account locked and use administrator account to get mc info via RMCP+,,,,,,,2025Q2_HW_BUG討論,2025Q2
+133865,FWA-AIS6173,BMC,Clarifying,[BMC_NE01-3][Network]DUT can't get IPv6 SALLC when DUT is connected IPV6 server and enable IPv6 option.,,,,,,,2025Q2_HW_BUG討論,2025Q2
+133857,FWA-AIS6173,BMC,Rejected,"[BMC_I08-2.7][Case Intrusion]Sensor CASE_INTRUSION didn't display ""System unplugged from LAN""  when remove one of BMC LAN cable",,,,,,,2025Q2_HW_BUG討論,2025Q2
+133843,SKY-712V4,Unknown,Clarifying,"[HW-F0J0.0Z.05] PCIe Root Port Corrected Error on Device 0000:b7:02.0 (Vendor ID: 8086, Device ID: 0x0db0)",,,,,,,2025Q2_HW_BUG討論,2025Q2
+133828,FWA-T014,Unknown,Clarifying,[dBIOS4-C3.1][Cold reset w/ Device Keep Live] Wi-Fi Module Missing from lspci after Cold Reset.,,,,,,,2025Q2_HW_BUG討論,2025Q2
+133827,FWA-AIS6173,BMC,Rejected,"[BMC_I08-1][Threshold Sensors]SB_CPU1_3_3-VOL and SB_CPU1_VNN-VOL display ""Disable"" when DUT is S5",,,,,,,2025Q2_HW_BUG討論,2025Q2
+133801,FWA-T014,BIOS,Wait for next SW revision,[dBIOS2-A10.4][BIOS Setup menu specification] The wrong sensor name and an extra SATA Port are shown in the BIOS Setup Menu.,,,,,,,2025Q2_HW_BUG討論,2025Q2
+133776,VEGA-7030,BIOS,Fixed,"[dBIOS2-G09.1] [PCI Function -  Relaxed Ordering]  BIOS Setting ""Relaxed Ordering"" does not take effect as expected on PCIe devices",,,,,,,2025Q2_HW_BUG討論,2025Q2
+133766,VEGA-DHV300,BIOS,Rejected,"[dBIOS2-J02] [Support other upgrade BIOS Mechanism (exclude HPM)] Error message is shown before Post when ""Me FW Image Re-Flash"" is Enabled in BIOS setup menu.",,,,,,,2025Q2_HW_BUG討論,2025Q2
+133764,VEGA-7030,BIOS,Won't-fix,"[IPMI_O02-1] [WebUI] ""PC Health"" readings on the ""NCT6126D Hardware Monitor"" page in BIOS Setup Web UI show N/A",,,,,,,2025Q2_HW_BUG討論,2025Q2
+133762,FWA-AIS6173,BMC,Rejected,"[BMC_I09-1][SEL List]It have SEL ""Event Logging Disabled SYSTEM_EVENT_LOG ""  in SEL list when run ""SEL clear""",,,,,,,2025Q2_HW_BUG討論,2025Q2
+133716,SKY-8236MB-MU,BMC,Clarifying,[BMC_I11-1][Read FRU Data] The Node Explorer host name is SKY-8236MB.,,,,,,,2025Q2_HW_BUG討論,2025Q2
+133714,SKY-8236MB-MU,BMC,New,"[BMC_O02-3][Power Protection (Power good)]When power good sensor generates an event, but the power good ID is inconsistent in SEL log",,,,,,,2025Q2_HW_BUG討論,2025Q2
+133713,SKY-8236MB-MU,BMC,New,"[BMC_O03-6.2][Authentication Log]Clear clean authentication log, but Status always  keeps ""Erase in Progress""",,,,,,,2025Q2_HW_BUG討論,2025Q2
+133697,VEGA-6000,SW Tool,Fixed,[HW_F0D4.0A] DUT can't playback HDMI audio output.,,,,,,,2025Q2_HW_BUG討論,2025Q2
+133696,VEGA-6000,HW,Fixed,"[HW-R0R3.0A.0Z.06] AC power loss on the DUT causes the console connection to drop, so the next boot messages can't be seen in the terminal.",,,,,,,2025Q2_HW_BUG討論,2025Q2
+133677,FWA-6083,IPMI,Fixed,[HW-R0R3.0A.0Z.06_HW-R0R3.0B.0Z.06]SEL check and SDR scan comparison failures occurred during 100 iterations of system DC and AC power cycling tests.,,,,,,,2025Q2_HW_BUG討論,2025Q2
+133668,FWA-4134,BIOS,Wait for next SW revision,"[dBIOS2-J02] [Support other upgrade BIOS Mechanism (exclude HPM)] Error message is shown before Post when ""Me FW Image Re-Flash"" is Enabled in BIOS setup menu.",,,,,,,2025Q2_HW_BUG討論,2025Q2
+133656,SKY-722V4,Mechanical,Wait for next HW revision,"[HW-M0M3.0A.02] The clip tightness varies across different cages, some are too tight, while others are too loose.",,,,,,,2025Q2_HW_BUG討論,2025Q2
+133654,SKY-722V4,Mechanical,Clarifying,"[HW-M0M2.0A.06] The H100 GPU bracket is too short, resulting in a gap in the system.",,,,,,,2025Q2_HW_BUG討論,2025Q2
+133648,SKY-722V4,Mechanical,Wait for next HW revision,[HW-M0M3.0A.02] The Chassis cover cannot be closed smoothly.,,,,,,,2025Q2_HW_BUG討論,2025Q2
+133647,SKY-722V4,Mechanical,Fixing,[HW-M0M3.0A.02] Service tag cannot be plugged out.,,,,,,,2025Q2_HW_BUG討論,2025Q2
+133645,SKY-722V4,Mechanical,Clarifying,[HW-M0M3.0A.01] The PSU push/pull force exceeds the specified limits.,,,,,,,2025Q2_HW_BUG討論,2025Q2
+133620,SKY-722V4,Mechanical,Clarifying,[HW-M0M3.0A.02] H100 GPU bracket and Riser 2b are not compatible.,,,,,,,2025Q2_HW_BUG討論,2025Q2
+133618,SKY-722V4,Mechanical,Fixing,[HW-M0M1.0A.02] There is component be touched by test kit at chassis opening area on Riser 2a.,,,,,,,2025Q2_HW_BUG討論,2025Q2
+133612,SKY-722V4,HW,Wait for next HW revision,HW-F081.0Z.05] There are CRC error on X710-AT during Ethernet Frameloss test.,,,,,,,2025Q2_HW_BUG討論,2025Q2
+133608,HVS-6302,BIOS,Ready for DQA test,[dBIOS2-A09.1] [BIOS Version Token sync mechanism] The wrong string is shown in Version field in dmidecode type 0.  ,,,,,,,2025Q2_HW_BUG討論,2025Q2
+133603,SKY-722V4,HW,Wait for next HW revision,[HW-F081.0A.03] There are CRC error on X710-AT during DC power on off test.,,,,,,,2025Q2_HW_BUG討論,2025Q2
+133602,SKY-722V4,HW,Wait for next SW revision,[HW-R0R3.0A.0Z.06] S_AUX_12-VOL Lower Critical going low asserted occurred during the DC power on/off test in Round 75 during shutdown.,"+V12_SB one PSU spec 3A 經過D89會有壓降最大0.55V,以實際量測+V12V_AUX 靠近BMC 端為11.33V,因此LCR改設10%較佳容錯率較高,
+並可符合 OCP 最低電壓要求.",BMC將閾值調整為LCR 10%、UCR 5%以降低誤判；但因BMC設定來自EE料件參數，建議PM/EE/BMC三方討論並建立機種共通range定義流程，作為後續機種規格制定與預防依據。,,,,,2025Q2_HW_BUG討論,2025Q2
+133581,SKY-722V4,BMC,Wait for next SW revision,[BMC_I08-2.25][FAN_PRSNT Sensor] The FAN speed sensor status changed to 'ns' after hot-swap.,bruce.lee,2025-04-10,,,,,2025Q2_HW_BUG討論,2025Q2
+133579,HVS-6302,BIOS,Rejected,[dBIOS2-A09.1] [BIOS Version Token sync mechanism] It is shown wrong BIOS version string in EFI Environment. ,candy.chiang,2025-04-10,,,,,2025Q2_HW_BUG討論,2025Q2
+133571,SKY-8236MB-MU,BMC,New,"[BMC_O01-19][Reload Factory Defaults (0xF4)]BMC generates ""System Firmwares FW_PROGRESS | BIOS corruption detected |"" event when running load factory default",Vincent.Lin,2025-04-09,,,,,2025Q2_HW_BUG討論,2025Q2
+133568,SKY-722V4,(none),Rejected,[HW-R0R3.0B.0Z.06] The are abnormal SEL during AC power on off test.,bruce.lee,2025-04-09,,,,,2025Q2_HW_BUG討論,2025Q2
+133562,SKY-722V4,Unknown,Clarifying,[HW-R0R3.0B.01] The system failed to shutdown twice after the 'poweroff' command was executed in the OS during AC power on off test.,bruce.lee,2025-04-09,,,,,2025Q2_HW_BUG討論,2025Q2
+133561,FWA-6083,BIOS,Ready for DQA test,[HW-F051.0D]The operating system fails to detect or respond to the hot-swap or hot-plug of a 2.5-inch SATA/PCIe storage device.,Jenny3.Lin,2025-04-09,,,,,2025Q2_HW_BUG討論,2025Q2
+133560,SKY-722V4,3rd Party,Clarifying,[HW-R0R3.0B.0Z.01] There are AER errors occurred on the NVMe root port(10003:00:02.0) during AC power on off test.,bruce.lee,2025-04-09,,,,,2025Q2_HW_BUG討論,2025Q2
+133559,FWA-6083,HW,Fixed,[HW-F081.0F] The I210 Ethernet port order does not conform to the defined specifications.,由BIOS修改PCIe Address mapping方式修正，已於V013版更新,I210 Port order雖未依PM定義(左至右)，但屬BIOS可調整項，EERD因走線考量可能配置相反。建議不在設計階段強制同步，由產品進測時再依實際狀況調整即可。,,,,,2025Q2_HW_BUG討論,2025Q2
+133558,HVS-6302,BIOS,Clarifying,"[BIOS-B06] [BIOS scan onboard PCIe devices verify PCIe device and vendor IDs of onboard fixed devices] System install 2 NVMe device, but just one device is shown in rootport",candy.chiang,2025-04-09,,,,,2025Q2_HW_BUG討論,2025Q2
+133538,HVS-6302,BIOS,Closed,[dBIOS2-H08] [BIOS support CPU C State Control] Package C2 Residency is NOT presence in HWinfo when C states is  Enable and Package C State Limit is C2 in BIOS setup menu.,candy.chiang,2025-04-08,,,,,2025Q2_HW_BUG討論,2025Q2
+133536,HVS-6302,BIOS,Clarifying,[dBIOS2-H05] [NVME Device Support] The system recognize 1 NVMe device only but install 2 NVMe devices.,candy.chiang,2025-04-08,,,,,2025Q2_HW_BUG討論,2025Q2
+133497,SKY-8134DU,HW,Fixing,[HW-F05C.0A.02]A101-3 PCB reboot test: one NVMe disk's PCIe width downgraded to x2 instead of expected x4,RD重新插拔cable後未再重現,重新插拔 cable 後未再出現 PCIe x4→x2 降速情況，判斷為個案性接觸/線材問題；後續系統送測前建議先經 RD 檢查確認，以避免誤判為設計問題。,,,,,2025Q2_HW_BUG討論,2025Q2
+133495,SKY-722V4,3rd Party,Clarifying,[HW-R0R2.0A.03] The DISK temperature could not be read during reboot test.,bruce.lee,2025-04-08,,,,,2025Q2_HW_BUG討論,2025Q2
+133494,SKY-722V4,BMC,Wait for next SW revision,[BMC_I10-3][Chassis Identify] The Rear ID button does not light up blue when pressed.,bruce.lee,2025-04-08,,,,,2025Q2_HW_BUG討論,2025Q2
+133485,HVS-6302,BIOS,Rejected,"[dBIOS2-A09.1] [BIOS Version Token sync mechanism] The project name  shown ""HVS-6302B""  is incorrect during the POST phase.",candy.chiang,2025-04-07,,,,,2025Q2_HW_BUG討論,2025Q2
+133476,SKY-722V4,Mechanical,Fixing,[HW-R0R4.0Z.05]  The temperature of the GPU card is too high during the 24-hour stress test.,bruce.lee,2025-04-07,,,,,2025Q2_HW_BUG討論,2025Q2
+133475,SKY-722V4,3rd Party,Clarifying,[HW-R0R4.0B.03] The DISK temperature could not be read after 24 hours of stress.,bruce.lee,2025-04-07,,,,,2025Q2_HW_BUG討論,2025Q2
+133474,SKY-722V4,Unknown,Wait for next SW revision,[HW-R0R4.0Z] There were some abnormal SELs generated during the 24-hour stress test.,bruce.lee,2025-04-07,,,,,2025Q2_HW_BUG討論,2025Q2
+133469,SKY-8236MB-MU,BIOS,Clarifying,"[dBIOS2-A10.4][BIOS Setup menu specification] After setting ""Restore Defaults"" in the Setup Menu, the [System Error] and [RMT Debug Messages] values change to non-default values.",sandy.hung,2025-04-02,,,,,2025Q2_HW_BUG討論,2025Q2
+133468,SKY-8236MB-MU,Unknown,Fixing,"[BIOS-F03.2][Memory error, correctable ECC and uncorrectable ECC errors] When injecting a memory error using XDP, the host PC will display an error message.",sandy.hung,2025-04-02,,,,,2025Q2_HW_BUG討論,2025Q2
+133458,FWA-1081,BIOS,New,"[dBIOS4-C4.2] [Warm reset  w/ No Error] SEL logs ""FRB2/Hang in POST failure"" 25 times during 100 OS reboots, 1 time during 100 cold resets",Sherrie.Wu,2025-04-02,,,,,2025Q2_HW_BUG討論,2025Q2
+133456,FWA-1081,BIOS,Clarifying,"[dBIOS2-J04] [EFI Variable Keep/Clear Based on NVRAM Version] After HPM upgrading BIOS from V020 to V022 with the same NVRAM version, test EFI variables are not retained.",Sherrie.Wu,2025-04-02,,,,,2025Q2_HW_BUG討論,2025Q2
+133442,SKY-8236MB-MU,BIOS,Wait for next SW revision,[dBIOS2-A10.4][BIOS Setup menu specification] Secure Boot and Numa items are not found in the BIOS Setup Menu.,sandy.hung,2025-04-01,,,,,2025Q2_HW_BUG討論,2025Q2
+134094,FWA-6083,HW,Wait for next HW revision,"[PCIE-3032]During 100 iterations of OS reboot tests on the FWA-6083 system equipped with a PCIE-3032 card, failures were detected in the PCIe SCAN Compare check.","We've decided to change the clock topology from vendor recommend, which means need a layout modify.",依廠商建議修改 Clock Gen/Buffer，待下一版板回來再驗證；若重測 PASS，後續設計可參考。,,,,,2025Q2_HW_BUG討論,2025Q2
+134020,FWA-6083,HW,Wait for next HW revision,"[PCIE-3032]During 100 iterations of AC and DC power cycling tests on the FWA-6083 system equipped with a PCIE-3032 card, SEC AER check failures were detected.",,,,,,,2025Q2_HW_BUG討論,2025Q2
+,,,,,,,,,,,2025Q2_HW_BUG討論,2025Q2
+SKY-721E3 X710 10G Copper CRC errot won't fix:  CRC error 屬偶發性 (約1/100~5/200)，不影響NIC功能；已嘗試換線材、riser、X'Tal rework與Intel建議link partner測試，皆未根治。問題屬SI/Clock邊界，修正需大幅layout改版且成本高。因嚴重度低、影響有限，PM/RD決議設為Won’t Fix，待後續改版再複測。,,,,,,,,,,,2025Q2_HW_BUG討論,2025Q2
+133402,SKY-722V4,System,Clarifying,[HW-F0D1.0Z.05] There are water ripples on screen from front ear D-SUB output.,"ear D-SUB 有產生水波紋, Rear D-SUB 沒有問題",,bruce.lee,HW-F0D1.0Z.05,"Other error message related to D-Sub (not PCIe AER, MCE, PCIe lane error)",2025-03-28,2025Q1_HW_BUG討論,2025Q1
+133362,SKY-722V4,HW,Ready for DQA test,[HW-F081.0I] I210 Speed LED color does not comply with the SPEC at 100Mbps/1Gbps.,1G&100M的燈號顏色與SPEC定義相反,,bruce.lee,HW-F081.0I,Ethernet LED color/behavior is correct,2025-03-26,2025Q1_HW_BUG討論,2025Q1
+133290,SKY-722V4,HW,Waiting,[HW-F05C.0C] Front 16 NVMe port order did not meet SPEC.,"Front 16 NVMe port order
+應依照由上到下，由左至右的順序",,bruce.lee,HW-F05C.0C,Port Order (for PCIe interface),2025-03-21,2025Q1_HW_BUG討論,2025Q1
+133122,FWA-6173,HW,Wait for next SW revision,[HW-F081.0F] The I210 Ethernet port order does not conform to the defined specifications.,Port1&Port2 順序反了,,Jenny3.Lin,HW-F081.0F,Ethernet Port Order meet define documnet,2025-03-14,2025Q1_HW_BUG討論,2025Q1
+132915,SKY-8134DU,HW,New,[HW-M0M3.0A.03]The latch of the PCIe socket on the riser card was damaged during testing.,"插拔PCIe card過程, 聽到latch清脆的一聲&斷掉!",,ifen.chiang,HW-M0M3.0A.03,"Mechanical structure is reliable during Extraction/insertion Check[經過插拔測試後, 機構結構還是很可靠、強壯]",2025-03-06,2025Q1_HW_BUG討論,2025Q1
+131850,SKY-721E3,HW,Fixed,"[HW-F051.0M] 24 bay SKU Front 2.5"" SATA device LEDs behave inconsistently; the middle 8 light up orange when a device is removed, but the right 8 do not.","SATA Device燈號行為表現不一致
+中間的8顆拔掉會亮燈，但右邊的8顆拔掉不會亮燈",,bruce.lee,HW-F051.0M,SATA LED,2025-01-15,2025Q1_HW_BUG討論,2025Q1
+130719,Server Monitoring,SW Tool,Wait for next SW revision,[V24.12.03][SKY-7221 + windows server 2022] Inventory -> Memory still show Status&Slot after disable Scanning Configuration -> Memory -> Inventory. ,,,bruce.lee,,,2024-12-30,2024Q4_HW_BUG討論,2024Q4
+130699,SKY-8136S,BMC,Wait for next SW revision,[BMC_RF01-11][Account Service][broadcom]Account sso USER ID shall be 202 at redfish,,,Vincent.Lin,,,2024-12-25,2024Q4_HW_BUG討論,2024Q4
+130696,Server Monitoring,SW Tool,Wait for next SW revision,"[V24.12.03][SKY-7221 + windows server 2022] Inventory -> Memory show Extra Device when Modify ""Memory Inventory and Apply and then click the Rescan button and Apply""",,,bruce.lee,,,2024-12-25,2024Q4_HW_BUG討論,2024Q4
+130654,VEGA-6000,FW,New,[HW-F0D3.0C]DUT sometimes crash when change SDI input source resolution.,,,stephen.lee,,,2024-12-23,2024Q4_HW_BUG討論,2024Q4
+130650,SKY-8136S,Unknown,Clarifying,[dBIOS4-C1.2] The DUT Response Error: Class:2000000; Subclass:0; Operation:8000 Encountered,,,apple.chi,,,2024-12-20,2024Q4_HW_BUG討論,2024Q4
+130646,SKY-8134S-11,BIOS,Fixing,[dBIOS2-A09.4][Devices depend on HW Design are presented on DMI type 0-127 in platform] Extra type 15 is existed before type 127.,,,sandy.hung,,,2024-12-19,2024Q4_HW_BUG討論,2024Q4
+130644,FWA-1012VC,Unknown,Clarifying,[dBIOS-D01.7.1] [UEFI PXE support IPv4] System can't boot into boot option 2 [Intel I350 PXE port 1] when connect lan cable between I350 port 1 and PXE server lan port. ,,,Sherrie.Wu,,,2024-12-19,2024Q4_HW_BUG討論,2024Q4
+130643,Server Monitoring,SW Tool,Wait for next SW revision,"[V24.12.03][SKY-7221 + ubuntu 22.04] Inventory -> Memory show Extra Device when Modify ""Memory Inventory and Apply and then click the Rescan button and Apply""",,,bruce.lee,,,2024-12-19,2024Q4_HW_BUG討論,2024Q4
+130639,FWA-1012VC,Unknown,New,[BIOS-D01.1][Support UEFI OS boot] No WIFI module is found  in pci list for customer reserve pci resource,,,Sherrie.Wu,,,2024-12-19,2024Q4_HW_BUG討論,2024Q4
+130638,FWA-1012VC,BIOS,Clarifying,"[BIOS-D01.1][Support UEFI OS boot] It shows ""error: file `/EFI/ubuntu/x86_64-efi/bli.mod' not found"" when boot into EFI Ubuntu BSP .24.04",,,Sherrie.Wu,,,2024-12-19,2024Q4_HW_BUG討論,2024Q4
+130627,FWA-1012VC,BIOS,Clarifying,[dBIOS2-D06][Solution for BIOS default time less than 2000 years will cause OS set wrong year] RTC year can be set to 1999 in setup menu,,,Sherrie.Wu,,,2024-12-18,2024Q4_HW_BUG討論,2024Q4
+130625,SKY-8136S,BMC,Wait for next SW revision,[BMC_O03-8.1][SSH timeout][broadcom]SSH timeout is fail,,,Vincent.Lin,,,2024-12-18,2024Q4_HW_BUG討論,2024Q4
+130609,FWA-1214,BIOS,Verifying,"[dBIOS1-H00][BIOS support Basic CPU Function Control] Set Adjacent Cache Line Prefetch to Disabled and verify that the MSR register is 1, but it is 0.",,,sandy.hung,,,2024-12-16,2024Q4_HW_BUG討論,2024Q4
+130608,FWA-1214,BIOS,Won't-fix,"[BIOS-J01.1][ME support] When Me FW Image Re-Flash is set to Enabled and the system is Saved and Reset, two errors are generated.",,,sandy.hung,,,2024-12-16,2024Q4_HW_BUG討論,2024Q4
+130607,Server Monitoring,SW Tool,Wait for next SW revision,[V24.12.03][SKY-7221 + Ubuntu 22.04] There are typos in the messages output during deployment.,,,bruce.lee,,,2024-12-16,2024Q4_HW_BUG討論,2024Q4
+130519,VEGA-6000,FW,Fixed,[HW-F0D3.0C]DUT sometimes doesn’t into DUT login console page after DUT boot up if all SDI video input connector connect SDI video input source.,,,stephen.lee,,,2024-12-12,2024Q4_HW_BUG討論,2024Q4
+130511,VEGA-6000,FW,Fixed,[HW-F0D3.0A]DUT can't encode SDI2/SDI3/SDI4 Audio channel.,,,stephen.lee,,,2024-12-11,2024Q4_HW_BUG討論,2024Q4
+130510,VEGA-6000,FW,Fixing,[HW-F0D3.0A]There is noise audio output on 3G B DL 1920x1080/60Hz audio signal.,,,stephen.lee,,,2024-12-11,2024Q4_HW_BUG討論,2024Q4
+130508,VEGA-6000,FW,Fixed,[HW-F0D3.0A]The SDI Audio channel 3/4 is duplicate SDI Audio channel 1/2 signal.,,,stephen.lee,,,2024-12-11,2024Q4_HW_BUG討論,2024Q4
+130507,VEGA-6000,FW,Fixing,[HW-F0D3.0C]PC_B decode the disorder video at 3840x2160p/60Hz/59.94Hz/50Hz SDI1 video input signal.,,,stephen.lee,,,2024-12-11,2024Q4_HW_BUG討論,2024Q4
+130492,VEGA-6000,FW,New,[HW-F0D3.0C]PC_B decode the wrong video frame at HD 1920x1080psf SDI video input signal.,,,stephen.lee,,,2024-12-11,2024Q4_HW_BUG討論,2024Q4
+130491,VEGA-6000,FW,New,[HW-F0D3.0C]PC_B decode the frame rate is uncorrect at HD 1920x1080 SDI video input signal.,,,stephen.lee,,,2024-12-11,2024Q4_HW_BUG討論,2024Q4
+130490,VEGA-6000,FW,New,[HW-F0D3.0C]PC_B decode the shaking video at HD 1920x1080 SDI video input signal.,,,stephen.lee,,,2024-12-11,2024Q4_HW_BUG討論,2024Q4
+130489,VEGA-6000,FW,New,[HW-F0D3.0C] The DUT can't encode continously after SDI hot-plug.,,,stephen.lee,,,2024-12-11,2024Q4_HW_BUG討論,2024Q4
+130487,PCIE-1221PS,Chipset/Chip Vendor,Clarifying,"[HW-F081.0Z] There are ""Hardware Error"" during PCIe-1221PS ""frame loss test"" cause unexpected frame loss.",,,bruce.lee,,,2024-12-11,2024Q4_HW_BUG討論,2024Q4
+130410,VEGA-6000,SW Tool,Fixed,[HW-R0R4.0A]PC_B can't decode continuously during 24 hours stress test.,,,stephen.lee,,,2024-12-06,2024Q4_HW_BUG討論,2024Q4
+130409,VEGA-6000,SW Tool,Fixed,"[HW-F0D3.0C]When change SDI input source resolution, DUT can't encode.",,,stephen.lee,,,2024-12-06,2024Q4_HW_BUG討論,2024Q4
+130408,VEGA-6000,HW,New,[HW-R0R2.0A.01]DUT is hang up at reboot at 98 times and LED D36 is change to Red light.,"After HW re-work, EMMC reboot is still failed. U-boot reboot is fixed.
+It will add watch-dog solution at next HW version.
+Edit Log time Watch Copy ",,stephen.lee,HW-R0R2.0A.01,"執行Reboot後, DUT會Reboot ",2024-12-06 00:00:00,2024Q4_HW_BUG討論,2024Q4
+130406,VEGA-6000,SW Tool,New,[HW-F081.0I]The Ethernet LED2 status is Orange and blinking when LAN speed is 1GBps on RJ45_CN6 Upper/Down port.,,,stephen.lee,,,2024-12-06,2024Q4_HW_BUG討論,2024Q4
+130405,VEGA-6000,Unknown,Won't-fix,[HW-F081.0B]The CRC error is appeared on 100M Half Duplex 100% on DUT RJ45_CN6 Upper port and Down port.,,,stephen.lee,,,2024-12-06,2024Q4_HW_BUG討論,2024Q4
+130199,SKY-9236S3,Test Fixture & Environment,Fixed,[HW-R0R2.0A.03]  Node 2 OCP 3.0 loss after OS reboot test Round 16.,,,bruce.lee,,,2024-12-02,2024Q4_HW_BUG討論,2024Q4
+130198,SKY-9236S3,Test Fixture & Environment,Fixed,"[HW-R0R2.0A.0Z]  There are error messages on the GRUB menu, causing the OS to fail to boot during the OS reboot test in Round 19 on Node1.",,,bruce.lee,,,2024-12-02,2024Q4_HW_BUG討論,2024Q4
+130192,FWA-6183,Chipset/Chip Vendor,Fixed,"[dBIOS4-C3.2.2][Cold Reset w/o AER Error] AER  ""Replay Timer Timeout"" error that occurred on NMC-4006 during the 79th round of cold reset.",,,Sherrie.Wu,,,2024-11-29,2024Q4_HW_BUG討論,2024Q4
+129960,FWA-1214,BIOS,Fixed,[dBIOS2-J02][Support other upgrade BIOS SPI Mechanism  (exclude HPM)] BIOS downgrade fail from V100 to V029,,,Sherrie.Wu,,,2024-11-07,2024Q4_HW_BUG討論,2024Q4
+129956,FWA-1214,BIOS,Fixed,[dBIOS2-A10.4][BIOS Setup menu specification]Some default values in current BIOS version does not meet the default value of BIOS specification .,,,Sherrie.Wu,,,2024-11-07,2024Q4_HW_BUG討論,2024Q4
+129955,FWA-1214,BIOS,Fixed,[dBIOS2-D06][Solution for BIOS default time less than 2000 years will cause OS set wrong year] RTC year can be set to 1999 in setup menu,,,Sherrie.Wu,,,2024-11-07,2024Q4_HW_BUG討論,2024Q4
+129947,FWA-1214,BIOS,Fixed,"[BIOS-A09.3][Support Type 4/7 Processor/Cache Information] Socket Designation: filed shows ""U3E1"" in DMI type 4",,,Sherrie.Wu,,,2024-11-06,2024Q4_HW_BUG討論,2024Q4
+129938,FWA-1214,Spec Definition,Fixed,[dBIOS-D01.7.1] [UEFI PXE support IPv4] UEFI PXE device shall only support 1G RJ45 LAN Port for standard product but display fiber LAN Port in setup menu .,,,Sherrie.Wu,,,2024-11-06,2024Q4_HW_BUG討論,2024Q4
+129907,Server Monitoring,SW Tool,Fixed,"[V24.09.02][SKY-7221 + Windows 2022]It's generate additional empty DIMM field automatically when Delete 1 Memory Inventory and Apply and then click the Rescan button and Apply""",,,Vincent.Lin,,,2024-11-05,2024Q4_HW_BUG討論,2024Q4
+129899,FWA-1214,Unknown,Waiting,"[dBIOS4-C4.2.2][Warm Reset w/o AER Error] AER ""Receiver Error"" error that occurred during the 43th round of os reboot(warm reset).",,,Sherrie.Wu,,,2024-11-04,2024Q4_HW_BUG討論,2024Q4
+129898,FWA-1214,BIOS,Fixed,"[dBIOS1-G07.1][AC Power loss] ""State After G3 ""  in not hidden in setup  menu but FWA-1214 doesn't support power button.",,,Sherrie.Wu,,,2024-11-04,2024Q4_HW_BUG討論,2024Q4
+129894,VEGA-DUD550,Operating System,Fixed,[HW-R0R3.0A.03]Some PCI device is lost over AC Power on/off 1000 times.,,,stephen.lee,,,2024-11-04,2024Q4_HW_BUG討論,2024Q4
+129876,Server Monitoring,SW Tool,Won't-fix,"[V24.03.01][SKY-7221 + Ubuntu 22.04] After upgrading BMC FW and power on/off the system, server monitor agent lists 2 the same SKY-7721 agent(but can't understand which one is new and which one is old)",,,Vincent.Lin,,,2024-11-01,2024Q4_HW_BUG討論,2024Q4
+129855,VEGA-DUD550,Operating System,Fixed,[HW-R0R2.0A.03]Some PCI device is lost over DUT reboot 1000 times.,,,stephen.lee,,,2024-10-30,2024Q4_HW_BUG討論,2024Q4
+129852,Server Monitoring,SW Tool,Fixed,[V24.09.02][FWA-1013 + Windows server 2022] No data in Alerts Configuration -> Sensor.,,,bruce.lee,,,2024-10-30,2024Q4_HW_BUG討論,2024Q4
+129851,Server Monitoring,SW Tool,Wait for next SW revision,[V24.09.02][FWA-1013 + windows server 2022] iKVM status show failed after deployment.,,,bruce.lee,,,2024-10-30,2024Q4_HW_BUG討論,2024Q4
+129850,Server Monitoring,SW Tool,Fixed,"[V24.09.02][SKY-7221 + ubuntu 22.04]It's generate additional empty DIMM field automatically when Modify ""Memory Inventory and Apply and then click the Rescan button and Apply""",,,Vincent.Lin,,,2024-10-30,2024Q4_HW_BUG討論,2024Q4
+129839,FWA-T014,Unknown,Clarifying,"[HW-R0R3.0A.0Z.01] There are AER errors on ""00:1d.1"" during the DC power on/off test.",,,Jenny3.Lin,,,2024-10-29,2024Q4_HW_BUG討論,2024Q4
+129838,FWA-T014,Unknown,Clarifying,"[HW-R0R3.0B.0Z.01] There are AER errors on ""00:1d.0, 00:1d.1 & 00:1d.3"" during the AC power on/off test.",,,Jenny3.Lin,,,2024-10-29,2024Q4_HW_BUG討論,2024Q4
+129837,FWA-T014,Unknown,Clarifying,"[HW-R0R4.0Z.01] There are AER errors on ""00:1d.0 &00:1d.3"" during the system reboot test.",,,Jenny3.Lin,,,2024-10-29,2024Q4_HW_BUG討論,2024Q4
+129835,FWA-T014,BIOS,Fixed,[HW-F0E1.0E] SW defines that the button doesn't work.,,,Jenny3.Lin,,,2024-10-29,2024Q4_HW_BUG討論,2024Q4
+129824,FWA-T014,BIOS,Fixed,[HW-F060.0A.02] The USB 3.0 Port 2 bus speed shows 480 Mbit/s..,,,Jenny3.Lin,,,2024-10-28,2024Q4_HW_BUG討論,2024Q4
+129822,Server Monitoring,SW Tool,Fixed,"[Deploy 10 nodes+ Linux] [V24.09.02] In the BMC Connection Configuration, only one host status is online.",,,bruce.lee,,,2024-10-28,2024Q4_HW_BUG討論,2024Q4
+129820,VEGA-7030,Unknown,Won't-fix,[BIOS-A09.6][Support Type 16/17/19 Memory Information] The Configured Memory Speed in DMI type 17 is 5200 MT/s but shall be 5600 MT/s.,,,sandy.hung,,,2024-10-28,2024Q4_HW_BUG討論,2024Q4
+129769,Server Monitoring,SW Tool,Fixed,"[V24.09.02][FWA-1214 + ubuntu 22.04] Navigate to Configurations -> Alerts Configuration -> Sensor page, where the names of all sensors are in lowercase English letters.",,,bruce.lee,,,2024-10-23,2024Q4_HW_BUG討論,2024Q4
+129757,FWA-5072,Unknown,Clarifying,"[dBIOS4-C4.2][Warm reset w/ No Error] After running the BIOSAuto tool test item R_003, the SEL logs of 'Management Subsys Health BMC_HEALTH | Sensor failure' were found.",,,sandy.hung,,,2024-10-22,2024Q4_HW_BUG討論,2024Q4
+129741,SKY-9236S3,BIOS,Fixed,"[dBIOS2-A10.1][Advantech Setup menu  Module]After modifying the settings in the BIOS and save changes and reset, the system fails to boot up.",,,bruce.lee,,,2024-10-21,2024Q4_HW_BUG討論,2024Q4
+129738,SKY-9236S3,HW,Fixed,"[HW-R0R5.0A]  RTC timer is inaccurate for ""2.617045"" second/day.","複驗時注意，EPSON代理商回覆：
+以下Intel計算時間誤差的公式 if 考慮 Xtal誤差=20ppm，時間誤差 應代入 29.7ppm => 推得 誤差 < 2.566秒/天
+註：
+deviation 板上PCB造成的誤差 (ppm) EPSON規定是Fine tune到 低於10ppm以內 => 此案例為 9.7ppm",,bruce.lee,HW-R0R5.0A,RTC Accuracy,2024-10-21 00:00:00,2024Q4_HW_BUG討論,2024Q4
+129679,Server Monitoring,SW Tool,Fixed,[V24.09.02][SKY-7221 + Ubuntu 22.04] Sensor infor of Alert display no data ,,,Vincent.Lin,,,2024-10-18,2024Q4_HW_BUG討論,2024Q4
+129670,SKY-8136S,BIOS,Wait for next SW revision,[HW-R0R3.0B.0Z.06] The DUT rebooted once during the OS phase of both the power cycle and the reboot tests,,,apple.chi,,,2024-10-18,2024Q4_HW_BUG討論,2024Q4
+129647,SKY-9236S3,BMC,Fixed,"[BMC_P08-1]  After powering off one of the nodes, the fan speed in the same fan zone will drop to 700 RPM.",,,bruce.lee,,,2024-10-17,2024Q4_HW_BUG討論,2024Q4
+129625,SKY-9236S3,BMC,Fixed,"[HW-R0R3.0A.04]  After shutting down Node1/2/3/4, pressing the power button an odd number of times turns it on, while an even number of times does not during the DC on/off test.",,,bruce.lee,,,2024-10-15,2024Q4_HW_BUG討論,2024Q4
+129589,SKY-9236S3,HW,Fixed,[HW-F081.0A] The I210 Subsystem Vendor ID and Subsystem ID are incorrect.,"改燒 MIC-8340_I210_V02.bin
+Spec: (MIC-8340)-VPD_v03_SVID改回預設值.xlsx
+申請142料號: 1420061555
+發 ECOP-185639",,bruce.lee,HW-F081.0A,Ethernet VPD/transceiver Information is readable and correct.,2024-10-11 00:00:00,2024Q4_HW_BUG討論,2024Q4
+129584,SKY-9236S3,Spec Definition,Clarifying,[HW-R0R4.0Z.05]  The temperature of the Node 3 CX7 OCP card is too high after 24 hours stress testing.,,,bruce.lee,,,2024-10-11,2024Q4_HW_BUG討論,2024Q4
+129580,SKY-9236S3,BMC,Fixed,[BMC_P08-1]  FAN2 does not reach full speed after unplugging FAN1.,,,bruce.lee,,,2024-10-09,2024Q4_HW_BUG討論,2024Q4
+129578,SKY-9236S3,BMC,Fixed,[BMC_I07-3]  Node2/3/4 information LED always light up red after power on.,,,bruce.lee,,,2024-10-09,2024Q4_HW_BUG討論,2024Q4
+129577,SKY-9236S3,BMC,Fixed,"[BMC_I07-3]  After plug out one fan, the information LED no action.",,,bruce.lee,,,2024-10-09,2024Q4_HW_BUG討論,2024Q4
+129576,SKY-9236S3,BMC,Fixed,"[BMC_I07-3]  After modifying the C0_DIMM_A1-TMP threshold, the BMC didn't trigger an overheat alert and the information LED no action.",,,bruce.lee,,,2024-10-09,2024Q4_HW_BUG討論,2024Q4
+129566,SKY-8136S,BIOS,Fixed,[HW-F070.0C] There is an abnormality in the LED behavior and actions in the VROC RAID functionality. (Rebuild / Location LED),,,apple.chi,,,2024-10-09,2024Q4_HW_BUG討論,2024Q4
+129565,SKY-8136S,HW,Fixed,[HW-F081.0Z.05]There is a CRC issue with the X710 10GBase-T port.,"參考sky-721e3 經驗,
+更改r136/r140 0 ohm to 150 ohm",,apple.chi,HW-F081.0Z.05,"Other error message related to Ethernet (not PCIe AER, MCE, PCIe lane error)",2024-10-09 00:00:00,2024Q4_HW_BUG討論,2024Q4
+129561,SKY-8136S,Spec Definition,Fixing,[HW-F0J1.0H]The PCIe order does not match the printed order,,,apple.chi,,,2024-10-09,2024Q4_HW_BUG討論,2024Q4
+129539,SKY-9236S3,Unknown,Clarifying,"[HW-F010.0C.03]  In Device Manager, there are two COM1 ports, and one of the COM1 ports has a yellow mark on windows server 2022.",,,bruce.lee,,,2024-10-08,2024Q4_HW_BUG討論,2024Q4
+129482,SKY-9236S3,Test Fixture & Environment,Fixed,[HW-F051.0M.01]  Node2/3/4 SATA LED are not blinking during R/W.,,,bruce.lee,,,2024-10-07,2024Q4_HW_BUG討論,2024Q4
+129481,SKY-9236S3,Chipset/Chip Vendor,Fixed,"[HW-R0R3.0B.0Z.01]  There are AER error on ""E3.S Solidigm NVMe"" during the AC power on/off test.",,,bruce.lee,,,2024-10-07,2024Q4_HW_BUG討論,2024Q4
+129479,SKY-9236S3,Chipset/Chip Vendor,Fixed,"[HW-R0R3.0B.0Z.06]  There are ""Processor PROC_STATE | Uncorrectable machine check exception | Asserted"" SEL during the AC power on/off test.",,,bruce.lee,,,2024-10-07,2024Q4_HW_BUG討論,2024Q4
+129477,SKY-9236S3,Chipset/Chip Vendor,Fixed,[HW-R0R3.0B.0Z.06]  Node1/2/3/4 rebooted twice during the OS phase of the AC power on/off test.,,,bruce.lee,,,2024-10-07,2024Q4_HW_BUG討論,2024Q4
+129476,SKY-9236S3,Chipset/Chip Vendor,Fixed,"[HW-R0R3.0B.0Z.06]  Node2/3 displayed the message 'usb 1-3: device descriptor read/64, error -71' during the AC power on/off test.",,,bruce.lee,,,2024-10-07,2024Q4_HW_BUG討論,2024Q4
+129474,SKY-9236S3,Unknown,Fixed,[HW-R0R3.0B.04]  Node2 did not power on during the AC power on/off test at the 46th iteration.,,,bruce.lee,,,2024-10-07,2024Q4_HW_BUG討論,2024Q4
+129463,"NVS-811RL,NVS-821RL",BIOS,Wait for next SW revision,"[BIOS-A09.6][Support Type 16/17/19 Memory Information] The number of memory slots in HW design is 2, but the number of DMI type 17 is 4.",,,sandy.hung,,,2024-10-07,2024Q4_HW_BUG討論,2024Q4
+129451,"NVS-811RL,NVS-821RL",Unknown,New,[dBIOS2-G06][HW Monitor support through BIOS] Some BIOS sensor items on the hardware monitor page cannot be found on the BMC Web.,,,sandy.hung,,,2024-10-04,2024Q4_HW_BUG討論,2024Q4
+129450,"NVS-811RL,NVS-821RL",BIOS,Clarifying,"[dBIOS2-H08][BIOS support CPU C State Control] Set package C state Limit to C2 in the Setup Menu, but package C2 is not shown in the HWInfo tool.",,,sandy.hung,,,2024-10-04,2024Q4_HW_BUG討論,2024Q4
+129476,SKY-9236S3,"Chipset/Chip Vendor
+_HW討論",Fixed,"[HW-R0R3.0B.0Z.06]  Node2/3 displayed the message 'usb 1-3: device descriptor read/64, error -71' during the AC power on/off test.","[分享ISSUE，如果Solution是下在設計的版子上，那新platform要再注意]
+Solution:
+移除主板 BOM的: R206, R205。換32*25料，ECOP-185639。
+因為 AST2600 USB portB 內部有漏電，上一代已有驗到此問題之前有PCH可透過BIOS關掉，這代接瑞薩IC只能移除電阻，已有知會BMC RD加入 BMC scm review Checklist。",,bruce.lee,HW-R0R3.0B.0Z.06,"Other error message related to G3 Power On/Off (not PCIe AER, MCE, PCIe lane error)",2024-10-07 00:00:00,2024Q4_HW_BUG討論,2024Q4
+130095,VEGA-7030,"Unknow
+_HW討論",Clarifying,[HW-R0R3.0B.02] The DUT halts at the BIOS setup menu during the AC power cycle test.,"因現象是BMC module無法在開機當下存取 DRAM，導致BMC Kernel panic hang 住的問題
+交叉實驗發現問題偏向是BMC module issue，但的確有動到HW，看是不是能跨HW團隊討論",,apple.chi,HW-R0R3.0B.02,"確認OS的次數和開關機次數要一致 
+ Counter number in OS utility is the same with counter in on/off kit during G3 testing",2024-11-19 00:00:00,2024Q4_HW_BUG討論,2024Q4
+130192,FWA-6183,"Chipset/Chip Vendor
+_HW討論",Fixed,"[dBIOS4-C3.2.2][Cold Reset w/o AER Error] AER  ""Replay Timer Timeout"" error that occurred on NMC-4006 during the 79th round of cold reset.","此AER Issue已知 => AMD and Intel gen4/gen5平台搭gen3 x710 (NVM ver. < 9.3)都會有AER Error
+但希望藉由BUG討論的機會，討論NVM是否有管控機制。",,Sherrie.Wu,dBIOS4-C3.2.2,Cold Reset w/o AER Error,2024-11-29 00:00:00,2024Q4_HW_BUG討論,2024Q4
+124920,VEGA-6321,BIOS,Ready for DQA test,"[BIOS-A07][The BIOS support ACPI] It shows ""ACPI BIOS Error "" message in dmesg",,,Sherrie.Wu,,,2024-06-26,2024Q2_HW_BUG討論,2024Q2
+124581,NAMB-3051MB,BIOS,Wait for next SW revision,"[BIOS-A09.2.1][DMI type1/2/3 sync from FRU info] The DMI type 1 ""SKU Number"" doesn't sync from the ""Product Part Number"" of FRU.",,,sandy.hung,,,2024-06-07,2024Q2_HW_BUG討論,2024Q2
+124110,VEGA-7030,BIOS,Ready for DQA test,"[BIOS-A09.3][Support Type 4/7 Processor/Cache Information] Socket Designation: filed shows ""U3E1"" in DMI type 4",,,Sherrie.Wu,,,2024-05-20,2024Q2_HW_BUG討論,2024Q2
+123776,SKY-721E3,3rd Party,Won't-fix,"[BIOS-D01.7.2] [Support Network Stack PXE booting)] The right side I210 PXE Boot is Fail ,But Management Port I210 PXE work normally.",,,Sherrie.Wu,,,2024-04-26,2024Q2_HW_BUG討論,2024Q2
+123781,SKY-721E3,Unknown,Rejected,"[BIOS-I01] [BIOS support virtualization] When the SVM function set to Enable, the SVM register still equal 0",,,Sherrie.Wu,,,2024-04-26,2024Q2_HW_BUG討論,2024Q2
+124375,FWA-1081,BMC,Wait for next SW revision,[BMC_I07-1][PEF] PEF filter list does not include UNR threshold for temperature.,,,David.Huang,,,2024-05-29,2024Q2_HW_BUG討論,2024Q2
+123551,SKY-602E3,BMC,Wait for next SW revision,"[BMC_I08][Sensor] After running the BIOSAuto tool test items R_002, the PAY_12-VOL threshold value is too low in round 98.",,,sandy.hung,,,2024-04-19,2024Q2_HW_BUG討論,2024Q2
+123809,ASMB-956/SKY-7632/SKY-7232D3E,BMC,New,"[BMC_I08-1][Threshold Sensors]Plugin Advnatech PCIE card (PCIe-3031LBGREX8_AKAX846228, BMC sensor add display ""NVIDIA_2-TMP"" sensor)",,,Vincent.Lin,,,2024-04-30,2024Q2_HW_BUG討論,2024Q2
+123292,SKY-721E3,Unknown,Wait for next SW revision,"[BMC_I08-2.10] [DIMM_PRSNT Sensor]BMC sensor  DUT get the SEL Message "" Management Subsys Health BMC_HEALTH | Sensor failure | Asserted"" during the 100 times Cold Reset.  ",,,Sherrie.Wu,,,2024-04-12,2024Q2_HW_BUG討論,2024Q2
+123042,SKY-602E3,BMC,Wait for next SW revision,[BMC_I08-2.10][DIMM_PRSNT Sensor] The device scan can not consistent with the default list during AC power cycle.,,,Jenny3.Lin,,,2024-04-09,2024Q2_HW_BUG討論,2024Q2
+124374,FWA-1081,BMC,Wait for next SW revision,[BMC_I08-2.13][PSU Sensors] PSU location is incorrect.,,,David.Huang,,,2024-05-29,2024Q2_HW_BUG討論,2024Q2
+124381,SKY-8236MB-MU,BMC,Wait for next SW revision,[BMC_I08-2.13]PSU SEL asserted and then deasserted during stress 24hr testing,,,ifen.chiang,,,2024-05-29,2024Q2_HW_BUG討論,2024Q2
+124963,FWA-5082,BMC,Fixing,[BMC_I08-2.9][PSU_PRSNT Sensor]PSU1/2 location different with print,,,Vincent.Lin,,,2024-06-27,2024Q2_HW_BUG討論,2024Q2
+124376,FWA-1081,BIOS,Wait for next SW revision,"[BMC_NE01-1][Baseboard Population / Inventory] Network Interface devices speed show on WebUI is ""Gen 1"", but is ""Gen 2"".",,,David.Huang,,,2024-05-29,2024Q2_HW_BUG討論,2024Q2
+124028,FWA-1081,BMC,Wait for next SW revision,[BMC_NE03-4][eSW Update - BIOS] Press abort button will make Node Explorer stuck.,,,David.Huang,,,2024-05-14,2024Q2_HW_BUG討論,2024Q2
+124382,FWA-1081,BMC,Wait for next SW revision,"[BMC_NE04-2][Remote Serial Console] After remote serial console session timeout and close, local console still locked.",,,David.Huang,,,2024-05-29,2024Q2_HW_BUG討論,2024Q2
+124868,FWA-5082,BIOS,Wait for next SW revision,"[BMC_RF01-14][BIOS Setting] Change BIOS setting but it's display ""The property ADVP087 is not in the list of valid properties for the resource.""",,,Vincent.Lin,,,2024-06-21,2024Q2_HW_BUG討論,2024Q2
+124870,FWA-5082,BIOS,Wait for next SW revision,[BMC_RF01-14][BIOS Setting] Change BIOS setting but it's not work,,,Vincent.Lin,,,2024-06-21,2024Q2_HW_BUG討論,2024Q2
+124388,VEGA-7030,BIOS,Ready for DQA test,[dBIOS1-D01.7.2] [Support Network Stack PXE booting)]  The PXE Boot list has  boot option for external inserted pcie card(Mellanox  CX-6).And no i210 PXE support in boot list,,,Sherrie.Wu,,,2024-05-29,2024Q2_HW_BUG討論,2024Q2
+124126,VEGA-7030,BIOS,Fixed,[dBIOS2-A09.1] [BIOS Version Token sync mechanism] BIOS version in EFI Variable does not meet product definition when support BMC/Non-BMC SKU.,,,Sherrie.Wu,,,2024-05-21,2024Q2_HW_BUG討論,2024Q2
+123782,SKY-721E3,BIOS,Wait for next SW revision,[dBIOS2-A09.1] [BIOS Version Token sync mechanism] BIOS version in EFI Variable does not meet product definition.,,,Sherrie.Wu,,,2024-04-26,2024Q2_HW_BUG討論,2024Q2
+124921,VEGA-6321,BIOS,Ready for DQA test,"[dBIOS2-A09.1][BIOS Version Token sync mechanism] It displays the BIOS string ""VEGA- 6321 BIOS V2.26 (05/30/2024)"" in EFI variable , but there is an extra space in the product name(VEGA- 6321).",,,Sherrie.Wu,,,2024-06-26,2024Q2_HW_BUG討論,2024Q2
+123738,SKY-721E3,Unknown,Won't-fix,"[dBIOS2-A09.3] [System support Memory DIMM w/ CPU Maximum memory speed] DUT provide the mixed memory types cause the memory test fail(Total are 24 Memory DIMMS ,there are 23 memory DIMMS whose brand is A-DATA, and the other one is Micron.)",,,Sherrie.Wu,,,2024-04-25,2024Q2_HW_BUG討論,2024Q2
+123549,SKY-602E3,BIOS,Fixed,[dBIOS2-A09.4][Devices depend on HW Design are presented on DMI type 0-127 in platform] Extra type 45 exists before type 127.,,,sandy.hung,,,2024-04-19,2024Q2_HW_BUG討論,2024Q2
+124320,VEGA-7030,BIOS,Ready for DQA test,[dBIOS2-A10.2][Hot Key for Boot into Setup menu] Press F2 button can't enter into Setup menu ,,,Sherrie.Wu,,,2024-05-24,2024Q2_HW_BUG討論,2024Q2
+123497,SKY-602E3,BIOS,Fixed,[dBIOS2-A10.4][BIOS Setup menu specification] BIOS setup menu items are different from the BIOS specifications.,,,sandy.hung,,,2024-04-17,2024Q2_HW_BUG討論,2024Q2
+124373,VEGA-7030,Intel/AMD Security,Wait for next SW revision,[dBIOS2-H10][Security Vulnerability Protection for Intel CPU -Microcode Update] DUT microcode version(0x123) is less than the latest Intel Security Update(2024.3 is 0x125). ,,,Sherrie.Wu,,,2024-05-29,2024Q2_HW_BUG討論,2024Q2
+123740,SKY-721E3,Unknown,Won't-fix,"[dBIOS3-G07.2] [AC Power loss (Workbook 0.4)] When ""Power Restore Policy "" is always on . Press power button to shut down the DUT and AC power off then power on , DUT keep in Power off state.",,,Sherrie.Wu,,,2024-04-25,2024Q2_HW_BUG討論,2024Q2
+123605,SKY Server Hardware Monitoring Software Suite,SW Tool,Fixed,"[Deploy 10 nodes+Linux] [V24.03.01] After deployment, one node Scanning Configuration Memory is unable to enable the collector/inventory.",,,bruce.lee,,,2024-04-23,2024Q2_HW_BUG討論,2024Q2
+123625,SKY Server Hardware Monitoring Software Suite,SW Tool,Fixed,"[Deploy 10 nodes+Linux] [V24.03.01] When the 9 [Agent] server are restarted, some nodes alert history can not get data.",,,bruce.lee,,,2024-04-25,2024Q2_HW_BUG討論,2024Q2
+124022,SKY Server Hardware Monitoring Software Suite,SW Tool,Fixed,"[Deploy 10 nodes+Windows] [V24.03.01] After deployment, Randomly, one or two nodes web sometimes fail to retrieve data and it cause alert continuously resolved and firing.",,,bruce.lee,,,2024-05-14,2024Q2_HW_BUG討論,2024Q2
+124801,SKY Server Hardware Monitoring Software Suite,SW Tool,Clarifying,[Deploy 10 nodes+Windows] [V24.05.01] Agent server Configuration did not change to default after reinstalling [Agent] server.,,,bruce.lee,,,2024-06-17,2024Q2_HW_BUG討論,2024Q2
+124742,SKY Server Hardware Monitoring Software Suite,SW Tool,Rejected,"[Deploy 10 nodes+Windows] [V24.5.01] After deployment, the VEGA-7010 is unable to retrieve some storage data.",,,bruce.lee,,,2024-06-14,2024Q2_HW_BUG討論,2024Q2
+123347,NVS-502,Unknown,New,"[HW-F030.0B]DUT P-core set up one core turbo is not meet spec 5.2GHz, it is only 5.108GHz.",,,stephen.lee,,,2024-04-12,2024Q2_HW_BUG討論,2024Q2
+124802,SKY-8236MB-MU,FW,Ready for DQA test,[HW-F040.0B] The RMT test failed.,,,apple.chi,,,2024-06-17,2024Q2_HW_BUG討論,2024Q2
+124367,FWA-1214,HW,Wait for next HW revision,[HW-F083.0D] Onboard I210-IT LAN  Advance LAN Bypass LED is wrong when DC POWER OFF under BYPASS/DISCONNECT.,"Due to the non-use of U47 with V3.3_SB and BLINK_TIME_34, LAN3_ACT_N and LAN4_ACT_N were not pulled up to +V3.3_SB, resulting in this indicator light error",,Jenny3.Lin,HW-F083.0D,LAN Bypass Event & Action,2024-05-28,2024Q2_HW_BUG討論,2024Q2
+122939,VEGA-3312,FPGA,New,[HW-F0D3.0C] There is an abnormal screen in some resolutions.,,,james.chan,,,2024-04-08,2024Q2_HW_BUG討論,2024Q2
+122940,VEGA-3312,FPGA,New,[HW-F0D4.0B] HDMI video cannot be played back in some resolutions.,,,james.chan,,,2024-04-08,2024Q2_HW_BUG討論,2024Q2
+122943,VEGA-3312,FPGA,New,[HW-F0G0.0A.02] The temperature of the PCB board cannot be read through the I2C interface.,,,james.chan,,,2024-04-08,2024Q2_HW_BUG討論,2024Q2
+124021,SKY-8134DU,Chipset/Chip Vendor,Wait for next SW revision,[HW-F0J0.0A.03]Silicom PE310G4BPI40-T-SM[X540] compatibility test fail (AER error),,,ifen.chiang,,,2024-05-14,2024Q2_HW_BUG討論,2024Q2
+124020,SKY-8134DU,FW,Fixed,[HW-F0J0.0A.03]Silicom PE310G4BPI71-SR 10G Fiber-SR port x4  compatibility test fail (Port link down),,,ifen.chiang,,,2024-05-14,2024Q2_HW_BUG討論,2024Q2
+124971,PCIE-1220PS,FW,New,"[HW-F0J0.0Z.05] There are ""Hardware Error"" on X710 LAN during AC/DC/OS Reboot/Stress test.[found at SKY-721E3]",,,ifen.chiang,,,2024-06-28,2024Q2_HW_BUG討論,2024Q2
+124134,VEGA-3312,FPGA,Wait for next SW revision,[HW-F0V1] SDI audio can't be captured in channels 13-16 and has noise in channels 9-12.,,,james.chan,,,2024-05-21,2024Q2_HW_BUG討論,2024Q2
+124131,VEGA-3312,FPGA,Wait for next SW revision,[HW-F0V1] SDI video cannot be captured in some resolutions.,,,james.chan,,,2024-05-21,2024Q2_HW_BUG討論,2024Q2
+123871,SKY-8236MB-MU,Unknown,Clarifying,"[HW-R0R2.0A.0Z.01, HW-R0R3.0B.0Z.01] Critical Interrupt SEL found in AC on/off testing and Reboot test. ",,,ifen.chiang,,,2024-05-06,2024Q2_HW_BUG討論,2024Q2
+123863,SKY-8236MB-MU,Operating System,Verifying,"[HW-R0R2.0A.0Z.01, HW-R0R3.0B.0Z.01] Hardware Error/PCIe error/corrected/SEC AER Check Test:FAIL at AC/Reboot test",,,ifen.chiang,,,2024-05-06,2024Q2_HW_BUG討論,2024Q2
+123868,SKY-8236MB-MU,Chipset/Chip Vendor,Clarifying,"[HW-R0R2.0A.0Z.01, HW-R0R3.0B.0Z.01] SEC SERR&PERR Test FAIL.[00:03.1][80:03.1] Intel Corporation Ice Lake PMON MSM",,,ifen.chiang,,,2024-05-06,2024Q2_HW_BUG討論,2024Q2
+122948,VEGA-3312,FPGA,New,[HW-R0R2.0A.0Z.05] There is no HDMI output 49 times out of 100 reboots.,,,james.chan,,,2024-04-08,2024Q2_HW_BUG討論,2024Q2
+124815,SKY-8134DU,Operating System,Fixed,[HW-R0R3.0A.0Z.05] The LAN stress test fails when the DUT undergoes a DC power cycle. (CPU core init fail),,,apple.chi,,,2024-06-18,2024Q2_HW_BUG討論,2024Q2
+123874,SKY-8236MB-MU,HW,Wait for next SW revision,"[HW-R0R3.0B.0Z.01] SEL ""Current C0_VCCDx_VR-CUR asserted"" reading is over threshold happened at Reboot testing. [fail rate: 3/100]","一開始HW RD有提供threshold給BMC RD.
+因為這產品比較初期
+後來Intel又再次改SPEC, 所以threshold沒更新到.",,ifen.chiang,HW-R0R3.0B.0Z.01,No PCIe AER error found during G3 testing,2024-05-06,2024Q2_HW_BUG討論,2024Q2
+123886,SKY-8236MB-MU,HW,Wait for next SW revision,"[HW-R0R3.0B.0Z.01] SEL ""Voltage AUX_12-VOL | Lower Critical going low"" asserted and then deasserted at the Reboot testing. [fail rate: 100/100]","12V_AUX 壓降比較大是因為從PDB到AUX 過了兩個 diode，一個diode壓降就0.3
+建議12V aux threshold調為10.5~12",,ifen.chiang,HW-R0R3.0B.0Z.01,No PCIe AER error found during G3 testing,2024-05-07,2024Q2_HW_BUG討論,2024Q2
+123875,SKY-8236MB-MU,(none),Clarifying,"[HW-R0R3.0B.0Z.01] SEL ""Voltage CPU0_VCCINF-VOL"" Lower Critical going low  | Asserted at AC testing. [fail rate: 100/100]",,,ifen.chiang,,,2024-05-06,2024Q2_HW_BUG討論,2024Q2
+123759,SKY-9234SU,HW,Clarifying,[HW-R0R3.0B.0Z.01]Node2_Node4_Gen5_KIOXIA_SAMSUNG_NVMe_Correctable Error: FAIL for Receiver Error,"Summary:
+config3. 有試過降速[gen5 device with bios set to gen4] => PASS
+config4. 有試過降速加VMD disable.. [gen5 device with bios set to gen4+vmd disable] => PASS
+
+PS: config4.特別降完Gen4後再disable VMD是因為 Cohesity之前有特別要求 所以PM想看看",,ifen.chiang,HW-R0R3.0B.0Z.01,No PCIe AER error found during G3 testing,2024-04-26,2024Q2_HW_BUG討論,2024Q2
+123069,SKY-8134DU,Test Fixture & Environment,Fixed,[HW-R0R3.0B.0Z.06]LAN R/W Test FAIL[RXCRCs found at BCM57504 NetXtreme-E 10Gb/25Gb/40Gb/50Gb/100Gb/200Gb Ethernet],,,ifen.chiang,,,2024-04-11,2024Q2_HW_BUG討論,2024Q2
+123492,SKY-602E3,HW,Clarifying,[HW-R0R4.0Z.05]SDR/AER check error during System stress test.,"M.2: 
+Issue might be a compatibility issue for M.2 SQF-C8MV2-512GDEDC & CPU 8224P
+
+GPU:
+Analysis: So far we've tried to reproduce the issue with three different PR CPUs. The only CPU we met the issue with is 8224P .",,Jenny3.Lin,HW-R0R4.0Z.05,"Other error message related to System stress (not PCIe AER, MCE, PCIe lane error)",2024-04-17,2024Q2_HW_BUG討論,2024Q2
+122944,SKY Server Hardware Monitoring Software Suite,SW Tool,Fixed,"[V24.03.01][SKY-7221 + Ubuntu 22.04]  After deployment and opening Scanning configuration GPU Data Collection and Inventory, GPU data cannot be collected correctly.",,,bruce.lee,,,2024-04-08,2024Q2_HW_BUG討論,2024Q2
+123064,SKY Server Hardware Monitoring Software Suite,SW Tool,Clarifying,"[V24.03.01][SKY-7221 + Ubuntu 22.04] After adding an additional Memory to the system to triggering an alert, shutting down the system, removing a Memory, and then power on does not have Memory inventory resolved message.",,,bruce.lee,,,2024-04-10,2024Q2_HW_BUG討論,2024Q2
+123775,SKY Server Hardware Monitoring Software Suite,SW Tool,Fixed,"[V24.03.01][SKY-7221 + Ubuntu 22.04] After deployment and open Scanning Configuration -> GPU Data Collection and apply, Inventory (All) show disable.",,,bruce.lee,,,2024-04-26,2024Q2_HW_BUG討論,2024Q2
+124102,SKY Server Hardware Monitoring Software Suite,SW Tool,Clarifying,"[V24.03.01][SKY-7221 + Ubuntu 22.04] After upgrading BMC FW and power on/off the system, New UUID agent(AKAR624333) registration failed to SiMG-Mon host.",,,bruce.lee,,,2024-05-20,2024Q2_HW_BUG討論,2024Q2
+123264,SKY Server Hardware Monitoring Software Suite,SW Tool,Fixed,[V24.03.01][SKY-7221 + Ubuntu 22.04] Inventory -> Network bond port's LAN port information without separators.,,,bruce.lee,,,2024-04-12,2024Q2_HW_BUG討論,2024Q2
+123576,SKY Server Hardware Monitoring Software Suite,SW Tool,Clarifying,"[V24.03.01][SKY-7221 + Ubuntu 22.04] Inventory -> Node System UUID Expected back to default after updating BMC, powering on/off the system, stopping the agent, and then starting the agent.",,,bruce.lee,,,2024-04-19,2024Q2_HW_BUG討論,2024Q2
+123266,SKY Server Hardware Monitoring Software Suite,SW Tool,Fixed,[V24.03.01][SKY-7221 + Ubuntu 22.04] Inventory page cannot display data after click magnifier on Network Type Field.,,,bruce.lee,,,2024-04-12,2024Q2_HW_BUG討論,2024Q2
+123594,SKY Server Hardware Monitoring Software Suite,SW Tool,Clarifying,[V24.03.01][SKY-7221 + Ubuntu 22.04] No automatic timeout logout after 30 minutes of logging into the web.,,,bruce.lee,,,2024-04-22,2024Q2_HW_BUG討論,2024Q2
+123458,SKY Server Hardware Monitoring Software Suite,SW Tool,Fixed,"[V24.03.01][SKY-7221 + Ubuntu 22.04] The storage usage exceeded the threshold, but the storage partition did not trigger an alert.",,,bruce.lee,,,2024-04-16,2024Q2_HW_BUG討論,2024Q2
+123493,SKY Server Hardware Monitoring Software Suite,SW Tool,Fixed,"[V24.03.01][SKY-7221 + Ubuntu 22.04] When one PSU is unplugged, after going to inventory configuration -> FRU rescan, the FRU items do not change.",,,bruce.lee,,,2024-04-17,2024Q2_HW_BUG討論,2024Q2
+123485,SKY Server Hardware Monitoring Software Suite,SW Tool,Fixed,"[V24.03.01][SKY-7221 + Ubuntu 22.04] When one PSU is unplugged, the alert level generated is incorrect.",,,bruce.lee,,,2024-04-17,2024Q2_HW_BUG討論,2024Q2
+123807,SKY Server Hardware Monitoring Software Suite,SW Tool,Fixed,[V24.03.01][SKY-7221 + Windows server 2022]  After deployment Scanning Configuration CPU is unable to enable the collector/inventory.,,,bruce.lee,,,2024-04-30,2024Q2_HW_BUG討論,2024Q2
+123810,SKY Server Hardware Monitoring Software Suite,SW Tool,Rejected,"[V24.03.01][SKY-7221 + Windows server 2022]  After deployment, the default setting for GPU collector/inventory in the scanning configuration is enabled.",,,bruce.lee,,,2024-04-30,2024Q2_HW_BUG討論,2024Q2
+123870,SKY Server Hardware Monitoring Software Suite,SW Tool,Fixed,"[V24.03.01][SKY-7221 + Windows server 2022]  After increasing the usage of virtual disk over critical threshold, It keeps repeatedly firing and resolved.",,,bruce.lee,,,2024-05-06,2024Q2_HW_BUG討論,2024Q2
+123835,SKY Server Hardware Monitoring Software Suite,SW Tool,Clarifying,"[V24.03.01][SKY-7221 + Windows server 2022] After adding an additional Memory to the system to triggering an alert, shutting down the system, removing a Memory, and then power on does not have Memory inventory resolved message.",,,bruce.lee,,,2024-05-02,2024Q2_HW_BUG討論,2024Q2
+123922,SKY Server Hardware Monitoring Software Suite,SW Tool,Fixed,"[V24.03.01][SKY-7221 + Windows server 2022] After changing the Storage inventory configuration (Logical Disk -> Name), the count of alerts on the little bell icon does not match Total Alert.",,,bruce.lee,,,2024-05-08,2024Q2_HW_BUG討論,2024Q2
+123842,SKY Server Hardware Monitoring Software Suite,SW Tool,Fixed,"[V24.03.01][SKY-7221 + Windows server 2022] After power on/off system and login in to web, it show ""grafana: Request failed with status code 401""",,,bruce.lee,,,2024-05-03,2024Q2_HW_BUG討論,2024Q2
+123894,SKY Server Hardware Monitoring Software Suite,SW Tool,Fixed,"[V24.03.01][SKY-7221 + Windows server 2022] After power on/off system and login in to web, it show ""Request failed with status code 502""",,,bruce.lee,,,2024-05-07,2024Q2_HW_BUG討論,2024Q2
+123855,SKY Server Hardware Monitoring Software Suite,SW Tool,Fixed,[V24.03.01][SKY-7221 + Windows server 2022] Inventory -> Network bond port's LAN port information didn't meet to SPEC.,,,bruce.lee,,,2024-05-03,2024Q2_HW_BUG討論,2024Q2
+123903,SKY Server Hardware Monitoring Software Suite,SW Tool,Fixed,[V24.03.01][SKY-7221 + Windows server 2022] Inventory -> Network port speed is -255 after change NIC card.,,,bruce.lee,,,2024-05-07,2024Q2_HW_BUG討論,2024Q2
+123953,SKY Server Hardware Monitoring Software Suite,SW Tool,Fixed,"[V24.03.01][SKY-7221 + Windows server 2022] When one PSU is unplugged, after going to inventory configuration -> FRU rescan, the FRU items do not change.",,,bruce.lee,,,2024-05-09,2024Q2_HW_BUG討論,2024Q2
+123950,SKY Server Hardware Monitoring Software Suite,SW Tool,Fixed,"[V24.03.01][SKY-7221 + Windows server 2022] When one PSU is unplugged, the alert level generated is incorrect.",,,bruce.lee,,,2024-05-09,2024Q2_HW_BUG討論,2024Q2
+124463,SKY Server Hardware Monitoring Software Suite,SW Tool,Clarifying,[V24.05.01][SKY-7221 + Ubuntu 22.04] There are error messages during deployment.,,,bruce.lee,,,2024-06-03,2024Q2_HW_BUG討論,2024Q2
+124303,SKY-8134DU,(none),Rejected,"[跟Ticket #124815 重複, reject this ticket][HW-F0J0.0A.03] (config 7.) DC power cycle LAN R/W test and info fail due to do_boot_cpu failed",,,ifen.chiang,,,2024-05-23,2024Q2_HW_BUG討論,2024Q2
+119353,FWA-1081,HW,Wait for next HW revision,"[PWR_GD1/DDR5_PWRGD.0A] DDR5_PWRGD always get 0, should be 1",RD 回覆下版新增PU電阻,,gen.chen,[PWR_GD1/DDR5_PWRGD.0A] ,,2024-01-04,2024Q1_HW_BUG討論,2024Q1
+117675,SKY-602E3,HW,Fixed,[HW-R0R4.0Z.01]AER/SEL check error during System stress test.,proper PCIe MUX/De-MUX setting(All 4dB-boost) is the final solution. ,,Jenny3.Lin,HW-R0R4.0Z.01,No PCIe AER error found during System Stress,2023-11-09,2023Q4_HW_BUG討論,2023Q4
+117674,SKY-602E3,HW,Fixed,[HW-R0R2.0A.0Z.01]AER/SEL check error  during OS reboot test.,proper PCIe MUX/De-MUX setting(All 4dB-boost) is the final solution. ,,Jenny3.Lin,HW-R0R2.0A.0Z.01,No PCIe AER error found during reboot testing,2023-11-09,2023Q4_HW_BUG討論,2023Q4
+117667,SKY-602E3,HW,Fixing,[HW-R0R3.0A.03]The device scan can not consistent with the default list then  AER/SEL check error then onboard X710 have CRC error during DC power cycle.,only got CRC error when we applied the workaround solution for the X710 PCIe lane missing issue.,,Jenny3.Lin,HW-R0R3.0A.03,"確認每次開機都能scan到和default list(DefaultPCI.txt)一致
+Device scan can be consistent with the default list during power cycle",2023-11-09,2023Q4_HW_BUG討論,2023Q4
+117666,SKY-602E3,HW,Fixed,[HW-R0R3.0B.03]The device scan can not consistent with the default list and ipmitool not found during AC power cycle.,proper PCIe MUX/De-MUX setting(All 4dB-boost) is the final solution. ,,Jenny3.Lin,HW-R0R3.0B.03,"確認每次開機都能scan到和default list(DefaultPCI.txt)一致
+Device scan can be consistent with the default list during power cycle",2023-11-09,2023Q4_HW_BUG討論,2023Q4
+118401,HVS-6302,HW,Fixing,[HW-R0R3.0A.03] FPGA device is disappeared during AC power cycle for 100 times.,"Adjust the startup sequence of FPGA and SOM, allowing the FPGA to initiate before the SOM,so that the FPGA's DONE pin signal connect to SOM's PWR_OK",,stephen.lee,HW-R0R3.0A.03,"確認每次開機都能scan到和default list(DefaultPCI.txt)一致
+Device scan can be consistent with the default list during power cycle",2023-12-07,2023Q4_HW_BUG討論,2023Q4
+118160,SKY-721E3,HW,Clarifying,[BMC_I08-2.13][PSU Sensor]BMC sometimes can't get Specific PSU sensor value and let BMC generate unexpected SEL when DUT reset,"由於Vednor無法複製問題 ,因此Fail PSU 已退回等待有多餘系統複製issue給Vendor帶回分析",,Vincent.Lin,BMC_I08-2.13,PSU Sensor,2023-12-01,2023Q4_HW_BUG討論,2023Q4
+118106,VEGA-6321,HW,Won't-fix,"[BIOS-C04][Console support after BIOS POST End] DUT sometimes can't  displayed BIOS release information when BIOS display AMI logo in HDMI output ,but always displayed on LCD panel.","PD / EE head那邊Chester會再另行告知，若沒問題就於bug review meeting上將此bug status改為won’t fix
+*後續標品VEGA-6321若有OEM/ODM新案需求，會By 客戶要求再更新
+原因: 此bug跟螢幕種類之反應時間可能也有關係，若改了開機時間會被拉長",,Sherrie.Wu,BIOS-C04,Console support after BIOS POST End,2023-11-28,2023Q4_HW_BUG討論,2023Q4
+117865,SKY-8134DU,HW,Clarifying,[HW-R0R3.0B.0Z.02] The DUT has MCE errors when using the EMR CPU.,"使用 EMR CPU 時 UPI BUS自動升級至20G,會出現 EMR ERROR.(SP CPU UPI 16G only)
+UPI BUS PCB 走 表層 所導致.
+EMR-UPI CPU0 Port 1 Rx 20.0Gb/s(原始無貼片)
+
+
+
+
+
+DEBUG:
+表層貼上 導電布 鐵片 銅片 跑 intel IOMT tools report",,apple.chi,HW-R0R3.0B.0Z.02,No MCE error found during G3 testing,2023-11-17,2023Q4_HW_BUG討論,2023Q4
+116846,FWA-2013,HW,Wait for next HW revision,"[BMC_NE03-5][eSW Update - CPLD/FPGA]BMC always keeps reset , DUTcan't boot successful when use new firmware PSU to let BMC upgrade FPGA via web after power cycle",It should use PSU_PWR_OK  to control on-switch in future as correct AUX circuit design.,,Vincent.Lin,BMC_NE03-5,eSW Update - CPLD/FPGA,2023-10-06,2023Q4_HW_BUG討論,2023Q4
+118855,VEGA-7030,Mechanical,Ready for DQA test,[HW-M0M3.0A.02] Metal parts and spatial positioning can not impact the functionality of SATA SSDs,Increased cable space in DVT version.,,apple.chi,HW-M0M3.0A.02,"ME component works together in general condtion [在一般使用下,機構元件彼此合作無間] [ 沒有機構干涉]",2023-12-12,2023Q4_HW_BUG討論,2023Q4
+118854,VEGA-7030,HW,Wait for next HW revision,[HW-M0M3.0A.02] The RISER8 PCIe cage presses against the COM serior bus cable.,HW 將會進行COM PORT 180度翻轉避免干涉,,apple.chi,HW-M0M3.0A.02,"ME component works together in general condtion [在一般使用下,機構元件彼此合作無間] [ 沒有機構干涉]",2023-12-12,2023Q4_HW_BUG討論,2023Q4
+114020,SKY-8134DU,HW,In Progress,[HW-R0R4.0Z.05][standard SKU] Hardware Error showed up during stress testing,"Riser board受溫度影響較大
+Work around
+<1> 對rise 背面，增加mylar 及移除原先的labe，如上cpu導風罩
+<2>更改RSIER 設計，將PCIe 訊號改為stripline ，需要增加層面及背鑽來實驗。
+(SKY-8134DU-ETN RIS1 的Riser 在高溫的情況下，在相同preset 及CTLE value 的情況下，eye height會衰減25% (參考LANE0_Preset7及8)，而preset0 同樣是PRESET0 CTLE gain 5/-9db ，SKY-8134DU-ENT RIS1 及ASMB-957的條件相同 ，SKY-8134DU-ENT RIS1 的 eye_height swiwng 也是三者當中最低，看來受溫度影響較大。)",,ifen.chiang,HW-R0R4.0Z.05,"Other error message related to System stress (not PCIe AER, MCE, PCIe lane error)",2023-07-28,2023Q3_HW_BUG討論,2023Q3
+114408,SKY-8134S-11,HW,Won't-fix,[HW-F081.0I] E810 The 25G NIC link speed LED for 10G/1G does not conform to the CIoT_LED_definition which specifies that it should be yellow/off not yellow/yellow.,產品定義的SPEC不符合Advantech PD制定的標準品LED Definition時的處理方式討論,,ifen.chiang,HW-F081.0I,Ethernet LED color/behavior is correct,2023-08-17,2023Q3_HW_BUG討論,2023Q3
+113941,SKY-8134S-11,HW,"Wait for 
+next HW revision",[HW-F060.0B] The system resets when inserting the USB hub or DVD ROM. ,USB Hub or DVD ROM插入造成系統Reset,,apple.chi,HW-F060.0B,USB hot swap,2023-07-25,2023Q3_HW_BUG討論,2023Q3
+113490,SKY-820V3,HW,Fixed,[HW-F081.0F] On board 10G - Intel X710-BM2 Port mapping not meet SPEC,網路Port mapping不符合產品SPEC,,Bill.lu,HW-F081.0F,Ethernet Port Order meet define documnet,2023-07-10,2023Q3_HW_BUG討論,2023Q3
+112385,SKY-721E3_MB,HW,Fixing,"[HW-F081.0A.03] There are CRC error on X710-AT during OS reboot Test.
+[Fail rate: 1/100]","1. X'TAL調校電容後複驗FAIL 
+2. 改用ASMB-831 PASS的CAT6A 5米線, FAIL
+3. 改Reboot後 等60s再跑info test(1 min至少)才會跑lan stress, FAIL
+4. 只跑linux pktgen或x86_auto 的lan stress(60s) ,對打設定b83p0 bc1p0 b83p1 bc1p1 --> FAIL rate至少50% (後來單跑stress fail情況很難複製出來)
+5. 朝OS+Driver搭配性做stress loop的實驗
+   對打設定b83p0 bc1p0 b83p1 bc1p1 (對打設定on board x710 與c1位置x710-T4對打)
+   <5.1>Ubuntu 23.04 + 原生driver i40e 6.2.0-25-generic: 10幾20次PASS
+   <5.2>Ubuntu 23.04 + i40e driver 22.3: 18次PASS
+   <5.3>Ubuntu 23.04 + i40e driver 22.2: 64次PASS
+   <6> Ubuntu 23.04 + i40e driver 22.2: Fail rate 4/60 (加reboot後stress)
+7. 另一片機台(ESE0389971) 使用Ubuntu 23.04 i40e driver22.3 板 ,做self loopback port0 to port 1 reboot+Stress 1min fail rate 1/63
+8. 又換了一片板子(ESE0389974) ,OS : Ubuntu 22.04 ,driver 22.3 ,on board x710 NVM 9.3 ,Link partner X710-T4 NVM9.3
+只跑pktgen ->跑10次沒有複製到問題
+但跑reboot+ stress 1min --- > 第7次發生crc error
+cable對調reboot+ stress 1min --- >沒幾次又發生crc error
+9. (ESE0389974) ,OS : Ubuntu 22.04 ,driver 22.3 ,on board x710 NVM 9.3 ,Link partner X710-T4 NVM9.3 rework:rj45 鐵殼直接gnd Fail rate 1/80
+10. 源頭跳線至電感input端,並無獲得改善Fail rate 1/5 
+11. 換MP CPU 9124 Fail rate 1/50
+12.  跑單port0 ,Fail rate 1/56",,bruce.lee,[HW-F081.0A.03],Ethernet Read/write function works normally,2023-05-24,2023Q2_HW_BUG討論,2023Q2
+112378,SKY-721E3_MB,HW,Fixed,[HW-F0J0.0A.02] There are LAN/PCIe SCAN Compare Test FAIL during AC/DC/OS Reboot test.,"1. E810 25 card Bus C1/C2上下交換後重新跑100次開關機，一樣C2發生降速問題16GT -> 5GT，跟著槽位跑
+2. 更新調整風扇轉速全轉""ipmitool raw 0x2c 0x15 0x00 0x0 0x64""後，進行DC on/off測試，還是發生E810降速問題
+3. 更新將BIOS換成SKY-8要出貨的9.01，第一次開機就發生降速問題。
+4. Update交換兩個Riser 2b後進行AC on/off測試，還是C2發生問題
+4.1 更新SKY8 BIOS 8.03 (CPU0/1 P1 port fixed P5 preset)
+測試126次開關機還是有發生E810 25G PCIe降速問題16GT --> 5GT，另外一片E810 25G則有降速度問題發生25G-->10G
+5.  外側單位iPASS 發現整個LTSSM過程停留再Phase1 timeout沒有繼續走到Phase2
+進入Phase2有一條件為BER需低於10 -4 次方,因此推斷Upstream /Downsream port preset 值不佳導致此問題
+6. 調了一版UP/DS preset =P4 發覺Fail rate (降Gen1)變得非常高
+7. 透過AMD ExpressIO 跑Maring選定P3 為Margin較大的選擇, 再由SI doble confirm P3 preset 也是PASS",,bruce.lee,[HW-F0J0.0A.02],PCIe Capabilities & Status should be right,2023-05-24,2023Q2_HW_BUG討論,2023Q2
+112592,SKY-721E3_MB,HW,Fixed,[HW-F0D1.0Z.05] There are water ripples on screen from front ear D-SUB output.,換較長的cable繞過choke後就沒有水波紋,,bruce.lee,[HW-F0D1.0Z.05],"Other error message related to D-Sub (not PCIe AER, MCE, PCIe lane error)",2023-05-29,2023Q2_HW_BUG討論,2023Q2
+112871,SKY-8134DU,HW,Fixed,[HW-F0O0.0B][fan LED behavior is correct] The FAN ID 5 keeps rotating when the system is in power off state.,"此Fan board 除了 SKY-8134使用外, SKY-7232/SKY-8232也有使用. [ PCB共版, BOM沒有共版 ]
+SKY-7232's OCP 有support NCSI 功能.. 所以standby的時候還有電 會比較熱. 所以需要FAN在standby mode的時候還是有轉速.
+
+SKY-8134DU OCP沒有support NCSI功能.. 所以可以不需要standby還有FAN轉&散熱.
+FPGA本來就有的功能是 偵測到OCP有插, standby下 FAN才會轉 [when OCP is present, AUX_FAN_EN_N will notify FAN board CPLD to enable FAN 5 PWM.]
+
+目前8134上的solution為:
+8134 BOM change 讓FAN's power connect to 12V, not 12V_SB [ we can resolve this problem by FS9/FS10 BOM selection.] [FS9 應該要NL; FS10 要上] [不要看線路圖上的NL資訊. 因為BOM沒有共版]",,YingZhe.Liu,[HW-F0O0.0B],Fan LED behavior is correct ,2023-06-12,2023Q2_HW_BUG討論,2023Q2
+110760,SKY-8134S-11,HW,Fixing,"[HW-R0R3.0A.03][BMC_I08-4] BMC_HEALTH / MB_PMIC_IN-VOL / MB_PMIC_IN-CUR SDR are triggered when the DUT runs the AC power cycle.
+Fail rate: 1/100","1. AC on and LM25066 sensor fail, need to wait for 45 seconds to restore LM25066.
+2.Found signal glitch at I2C bus when AC on., might be the root cause that LM25006 didn't response at BMC booting.
+(Ray reply: LM25066吃+12V_HOT,它在3VSB_MAN(BMC SMBUS 電源)之後20~30ms才會開啟
+故AC turn on 瞬間不到1ms的行為不會影響到LM25066的功能)
+
+we didn't get any solution or improve from TI FAE (see attached mail).
+so work around are
+1) when sensor fail, reboot BMC to trigger register LM25066 sensor again
+2) remove these two sensors
+*7/27 Meeting discussion agreed to disable these 2 sensors, and list this issue as minor. Will update in next version of BMC.",,apple.chi,[HW-R0R3.0A.03],確認每次開機都能scan到和default list(DefaultPCI.txt)一致,2023-04-07,2023Q2_HW_BUG討論,2023Q2
+111928,SKY-8134S-11,HW,Fixing,"[HW-F081.0I] NIC LED for 1G/25G doesn't fit ""CIoT_LED_Standard_product_definition"""," NIC LED for 1G/25G doesn't fit ""CIoT_LED_Standard_product_definition""",,apple.chi,[HW-F081.0I] ,Ethernet LED color/behavior is correct,2023-05-04,2023Q2_HW_BUG討論,2023Q2
+112093,SKY-8134S-11,HW,Wait for next SW revision,[HW-F081.0A] Shall use vendor default values for on board devices subsystem Vendor ID/Subsystem ID.,Shall use vendor default values for on board devices subsystem Vendor ID/Subsystem ID,,apple.chi,[HW-F081.0A] ,Ethernet Information is readable and correct.,2023-05-12,2023Q2_HW_BUG討論,2023Q2
+110990,SKY-820V3,HW,Fixed,"[HW-F051.0M.01] FP 6BAY SATA LED when HDD LED 1 & 2 are doing read/write, HDD LED 5 & 6 will blinking at the same time","use new BP JP Setting (將JP06 的jumper 設定為由Slot 4 開始解碼)
+& use new cable of SATA to Slimsas*4",,Bill.lu,[HW-F051.0M.01],SATA LED behavior is correct,2023-04-13,2023Q2_HW_BUG討論,2023Q2
+110989,SKY-820V3,HW,Fixed,[HW-F051.0M.01] Ear HDD LED not light & blink,"The SATAX_LED_N to FPGA were miss at ver A101-1
+So the main change of A101-2 is add SATAX_LEN_N to FPGA and ask BIOS config this pin",,Bill.lu,[HW-F051.0M.01,SATA LED behavior is correct,2023-04-13,2023Q2_HW_BUG討論,2023Q2
+110988,SKY-820V3,HW,Fixed,[HW-F060.0A.03] Front ear USB port show error message with Passmark USB 3.0 test kit,"Fail cause by use 100cm cable
+After check with PM 80cm cable will use on our project",,Bill.lu,[HW-F060.0A.03],USB Read/write function works normally,2023-04-13,2023Q2_HW_BUG討論,2023Q2

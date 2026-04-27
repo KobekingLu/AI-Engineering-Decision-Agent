@@ -1,0 +1,14 @@
+subject_format: '[Feature ID, chipset name] Issue description'
+description_required_sections:
+- Test Case
+- Specification or Expectation
+- Issue Description
+- Additional Information
+- Reproducible or Fail rate
+- Test Procedure
+- Test Configuration
+redmine_required_fields:
+- Component
+- HW Version
+- FW Version
+- Error Type

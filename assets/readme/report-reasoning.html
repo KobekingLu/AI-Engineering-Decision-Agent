@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reasoning Trace Demo</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --surface: #ffffff;
+      --ink: #172033;
+      --subtle: #5b6577;
+      --border: #d7deea;
+      --soft-blue: #eef6ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Microsoft JhengHei", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+    main {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 28px 20px 40px;
+    }
+    section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 22px;
+    }
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--subtle);
+      font-size: 13px;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 0 0 12px;
+      font-size: 38px;
+    }
+    .sub {
+      margin: 0 0 20px;
+      color: var(--subtle);
+      font-size: 18px;
+    }
+    ul {
+      margin: 0;
+      padding-left: 24px;
+    }
+    li {
+      margin-bottom: 14px;
+      font-size: 20px;
+      line-height: 1.55;
+      overflow-wrap: anywhere;
+    }
+    .badge-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+    .badge {
+      background: var(--soft-blue);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 14px;
+      color: var(--subtle);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section>
+      <p class="eyebrow">AI Engineering Decision Agent</p>
+      <h1>Reasoning Trace / 判斷依據</h1>
+      <p class="sub">Real output example from the current decision summary. / 目前 decision summary 的真實輸出範例。</p>
+      <div class="badge-row">
+        <span class="badge">Case: case_002_ae_issue</span>
+        <span class="badge">Issue Type: PCIe</span>
+        <span class="badge">Risk Level: Major</span>
+      </div>
+      <ul>
+        <li>Source context = AE case with medium evidence quality.</li>
+        <li>Issue type = PCIe because the case and matched bugs repeatedly mention: pcie, power, cycle, slot, gpu.</li>
+        <li>Risk level = Major because these severity rules/signals matched: A required device or slot is not detected in part of the intended configuration, but a workaround path is still mentioned.</li>
+        <li>Blocking evidence came from the current case itself: device disappearance / not-detected symptom.</li>
+        <li>Missing information still affecting confidence: reproduction rate or fail-rate data, component classification.</li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>

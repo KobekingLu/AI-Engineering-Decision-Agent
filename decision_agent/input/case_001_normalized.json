@@ -1,0 +1,10 @@
+{
+  "project": "SKY-XXXX",
+  "source_type": "engineering_issue",
+  "issue_description": "AC power cycle後，某張PCIe裝置偶發認不到。",
+  "log_snippet": "AER: Corrected error received ...",
+  "comments": "Issue only seen on slot 2 with specific riser.",
+  "current_config": "BIOS v1.02 / BMC v0.18 / riser A",
+  "expected_config": "Device should be detectable after AC cycle without PCIe errors.",
+  "known_context": "DQA found issue during EVT reliability run."
+}

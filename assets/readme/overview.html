@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Overview</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --surface: #ffffff;
+      --ink: #172033;
+      --subtle: #5b6577;
+      --border: #d7deea;
+      --accent: #0b6e4f;
+      --soft-blue: #eef6ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Microsoft JhengHei", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+    main {
+      max-width: 1520px;
+      margin: 0 auto;
+      padding: 28px;
+    }
+    .hero {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 24px;
+      align-items: start;
+      margin-bottom: 24px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 22px;
+    }
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--subtle);
+      font-size: 13px;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 0 0 14px;
+      font-size: 42px;
+      line-height: 1.15;
+    }
+    .lead {
+      margin: 0;
+      font-size: 20px;
+      color: var(--subtle);
+      line-height: 1.55;
+    }
+    .list {
+      margin: 18px 0 0;
+      padding-left: 22px;
+    }
+    .list li {
+      margin-bottom: 10px;
+      font-size: 18px;
+      line-height: 1.5;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 24px;
+    }
+    img {
+      display: block;
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: white;
+    }
+    .caption {
+      margin: 10px 0 0;
+      color: var(--subtle);
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <div class="card">
+        <p class="eyebrow">AI Engineering Decision Agent</p>
+        <h1>Issue-to-Decision Agent for AE / PM / RD / DQA</h1>
+        <p class="lead">A demo-ready engineering decision support agent that turns scattered issue evidence into a decision-ready summary.</p>
+        <ul class="list">
+          <li>Integrates issue text, logs, comments, PDF, HTML, and image evidence</li>
+          <li>Retrieves historical bug patterns from a local knowledge base</li>
+          <li>Outputs issue type, risk level, missing information, and recommended action</li>
+          <li>Supports explainable decision review across AE, PM, RD, and DQA</li>
+        </ul>
+      </div>
+      <div class="card">
+        <img src="workflow-diagram.png" alt="Workflow diagram">
+        <p class="caption">Workflow overview / 流程總覽</p>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <img src="report-summary.png" alt="Report summary">
+        <p class="caption">HTML report snapshot / HTML 報告畫面</p>
+      </div>
+      <div class="card">
+        <img src="report-reasoning.png" alt="Reasoning trace">
+        <p class="caption">Reasoning trace snapshot / 判斷依據畫面</p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

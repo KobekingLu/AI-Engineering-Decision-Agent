@@ -1,0 +1,5 @@
+streamlit
+rapidocr_onnxruntime
+PyMuPDF
+numpy
+Pillow
