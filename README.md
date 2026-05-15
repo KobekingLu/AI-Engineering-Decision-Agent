@@ -39,6 +39,9 @@ It is not meant to:
 - `assets/`
   Demo screenshots and example HTML artifacts used in the README.
 
+- `scripts/`
+  Utility scripts, including the rebuildable knowledge base builder.
+
 ## Quick Start
 
 Install dependencies:
@@ -77,11 +80,53 @@ Run the local Streamlit app:
 python web_app/run_app.py
 ```
 
+Run the full demo stack with the OpenClaw-style bridge:
+
+```powershell
+.\demo.bat
+```
+
+Stop the full demo stack:
+
+```powershell
+.\stop_demo.bat
+```
+
+`python web_app/run_app.py` starts only the human-facing UI. `.\demo.bat` starts the UI plus the bridge and local Gemma wiring used in the demo.
+
+If you need a screen recording or demo walkthrough, see [docs/demo-recording-guide.md](docs/demo-recording-guide.md).
+
 Example outputs are written to:
 
 - `output/decision_agent/`
 - `output/web_app/json/`
 - `output/web_app/html/`
+
+## OpenClaw Bridge
+
+The repo includes a local HTTP bridge at `decision_agent/openclaw_bridge.py`.
+
+It exposes:
+
+- `http://127.0.0.1:8787/health`
+- `http://127.0.0.1:8787/manifest`
+
+The bridge can run in local Gemma 4 mode or deterministic fallback mode, and the Streamlit UI shows its health status at startup.
+
+## Knowledge Base
+
+The repo can rebuild a governed SQLite knowledge base from:
+
+- `decision_agent/knowledge_base/redmine_bug_summary_merged.csv`
+- `decision_agent/knowledge_base/BUG Review/`
+
+Run:
+
+```powershell
+python scripts/build_knowledge_base_db.py
+```
+
+The generated database is written to `.tmp/knowledge_base.generated.sqlite3`. It is a rebuildable artifact, not a human-confirmed source of truth.
 
 ## Validation
 
@@ -118,6 +163,7 @@ Lifecycle signals such as `clarifying`, `fixing`, `ready for DQA test`, `verifyi
 - only human-confirmed root cause / solution / verification results belong in high-trust knowledge
 - meeting notes should preserve source, speaker, date, and context
 - open or unfinished cases should remain low-confidence references
+- the generated SQLite knowledge base is a rebuildable artifact and should not be treated as confirmed truth
 
 ## Current Boundary
 
