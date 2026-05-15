@@ -77,9 +77,13 @@ The decision summary is built around these fields:
 ## Knowledge Base and Rules
 
 - `knowledge_base/redmine_bug_summary_merged.csv`: historical bug summary data
+- `.tmp/knowledge_base.generated.sqlite3`: generated canonical SQLite knowledge base rebuilt from the CSV plus `BUG Review` materials
+- `scripts/build_knowledge_base_db.py`: rebuild the SQLite knowledge base from raw review files
 - `rules/severity_rules.yaml`: starter severity and risk rules
 - `rules/required_bug_fields.yaml`: required-field guidance
 - `templates/decision_summary_schema.json`: output schema template
+
+`load_bug_rows()` will prefer the generated SQLite knowledge base when it is present, and fall back to the CSV otherwise.
 
 ## Run from Repo Root
 

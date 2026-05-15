@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import json
+import sqlite3
 from pathlib import Path
 from typing import Any
 import re
@@ -27,6 +28,16 @@ def load_normalized_case(path: Path) -> NormalizedCase:
 
 
 def load_bug_rows(path: Path) -> list[HistoricalBug]:
+    for db_path in _candidate_knowledge_base_db_paths(path):
+        if not db_path.exists():
+            continue
+        try:
+            rows = _load_bug_rows_from_sqlite(db_path)
+        except sqlite3.Error:
+            continue
+        if rows:
+            return rows
+
     rows: list[HistoricalBug] = []
     with path.open(encoding="utf-8-sig", newline="") as handle:
         reader = csv.DictReader(handle)
@@ -43,6 +54,44 @@ def load_bug_rows(path: Path) -> list[HistoricalBug]:
                     source_sheet=str(row.get("source_sheet", "") or ""),
                 )
             )
+    return rows
+
+
+def _candidate_knowledge_base_db_paths(csv_path: Path) -> list[Path]:
+    if csv_path.suffix.lower() in {".sqlite3", ".db"}:
+        return [csv_path]
+    repo_root = csv_path.parents[2] if len(csv_path.parents) > 2 else csv_path.parent
+    return [
+        repo_root / ".tmp" / "knowledge_base.generated.sqlite3",
+        csv_path.parent / "knowledge_base.generated.sqlite3",
+        csv_path.parent / "knowledge_base.sqlite3",
+        csv_path.with_suffix(".sqlite3"),
+    ]
+
+
+def _load_bug_rows_from_sqlite(db_path: Path) -> list[HistoricalBug]:
+    with sqlite3.connect(db_path) as connection:
+        connection.row_factory = sqlite3.Row
+        cursor = connection.execute(
+            """
+            SELECT bug_id, project, component, status, subject, description, quarter, source_sheet
+            FROM canonical_bug_rows
+            ORDER BY CASE WHEN bug_id = '' THEN 1 ELSE 0 END, bug_id COLLATE NOCASE
+            """
+        )
+        rows = [
+            HistoricalBug(
+                bug_id=str(row["bug_id"] or ""),
+                project=str(row["project"] or ""),
+                component=str(row["component"] or ""),
+                status=str(row["status"] or ""),
+                subject=str(row["subject"] or ""),
+                description=str(row["description"] or ""),
+                quarter=str(row["quarter"] or ""),
+                source_sheet=str(row["source_sheet"] or ""),
+            )
+            for row in cursor.fetchall()
+        ]
     return rows
 
 

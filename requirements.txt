@@ -1,4 +1,7 @@
 streamlit
+openpyxl
+extract-msg
+python-pptx
 rapidocr_onnxruntime
 PyMuPDF
 numpy
