@@ -3,8 +3,12 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 import sys
+from urllib.error import HTTPError, URLError
+from urllib.parse import urljoin
+from urllib.request import Request, urlopen
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
@@ -21,6 +25,7 @@ from web_app.ocr_utils import is_ocr_available
 OUTPUT_ROOT = REPO_ROOT / "output" / "web_app"
 HTML_ROOT = OUTPUT_ROOT / "html"
 INPUT_ROOT = OUTPUT_ROOT / "input"
+OPENCLAW_BRIDGE_HEALTH_URL = os.environ.get("OPENCLAW_BRIDGE_HEALTH_URL", "http://127.0.0.1:8787/health")
 
 
 def main() -> None:
@@ -40,6 +45,7 @@ def main() -> None:
             else "Local OCR is not enabled, so scanned PDF and image files still need readable text or a sidecar JSON/TXT."
         )
     )
+    render_openclaw_bridge_status()
 
     mode = st.radio(
         "Input mode",
@@ -51,6 +57,63 @@ def main() -> None:
         render_text_mode()
     else:
         render_upload_mode()
+
+
+@st.cache_data(ttl=3, show_spinner=False)
+def fetch_openclaw_bridge_status(health_url: str) -> dict[str, object]:
+    request = Request(
+        health_url,
+        headers={
+            "Cache-Control": "no-cache",
+            "Pragma": "no-cache",
+        },
+    )
+    manifest_url = urljoin(health_url, "/manifest")
+    try:
+        with urlopen(request, timeout=2) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+            if not isinstance(payload, dict):
+                raise ValueError("Bridge health response was not a JSON object.")
+            payload["reachable"] = True
+            payload["health_url"] = health_url
+            payload["manifest_url"] = manifest_url
+            return payload
+    except (HTTPError, URLError, TimeoutError, ValueError, json.JSONDecodeError, OSError) as exc:
+        return {
+            "ok": False,
+            "reachable": False,
+            "health_url": health_url,
+            "manifest_url": manifest_url,
+            "error": str(exc),
+            "tools": [],
+        }
+
+
+def render_openclaw_bridge_status() -> None:
+    bridge_status = fetch_openclaw_bridge_status(OPENCLAW_BRIDGE_HEALTH_URL)
+
+    st.subheader("OpenClaw Bridge Status")
+    health_url = str(bridge_status.get("health_url", OPENCLAW_BRIDGE_HEALTH_URL))
+    manifest_url = str(bridge_status.get("manifest_url", urljoin(health_url, "/manifest")))
+
+    if bridge_status.get("reachable"):
+        st.success("Bridge is online and reachable.")
+        status_col, mode_col, model_col, tool_col = st.columns(4)
+        status_col.metric("Status", "Online")
+        mode_col.metric("Assistant Mode", str(bridge_status.get("assistant_mode", "N/A")))
+        model_col.metric("Local Model", str(bridge_status.get("local_model_model", "N/A")))
+        tool_col.metric("Tools", str(len(bridge_status.get("tools", []) or [])))
+        st.caption(f"Health: {health_url} | Manifest: {manifest_url}")
+        tools = bridge_status.get("tools", []) or []
+        if tools:
+            st.caption("Tools: " + ", ".join(str(tool) for tool in tools))
+    else:
+        st.warning("Bridge is offline or not reachable.")
+        st.caption(f"Checked: {health_url}")
+        st.code(str(bridge_status.get("error", "Unknown bridge error")), language="text")
+        st.caption(
+            "If you launched with `demo.bat`, try restarting the demo or checking the bridge log."
+        )
 
 
 def render_text_mode() -> None:
